@@ -1,0 +1,43 @@
+/*
+  Copyright 2008 David Nolden <david.nolden.kdevelop@art-master.de>
+
+  Permission to use, copy, modify, distribute, and sell this software and its
+  documentation for any purpose is hereby granted without fee, provided that
+  the above copyright notice appear in all copies and that both that
+  copyright notice and this permission notice appear in supporting
+  documentation.
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+  KDEVELOP TEAM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+  AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+#ifndef CHARTOOLS
+#define CHARTOOLS
+
+//A set of simple commands for handling simple characters
+//Are in a separate file so we can optimize them if needed
+
+inline bool isSpace(char c) {
+  return QChar(c).isSpace();
+}
+
+inline bool isLetter(char c) {
+  return QChar(c).isLetter();
+}
+
+inline bool isLetterOrNumber(char c) {
+  return QChar(c).isLetterOrNumber();
+}
+
+inline bool isNumber(char c) {
+  return QChar(c).isNumber();
+}
+
+#endif

@@ -1,0 +1,39 @@
+[Desktop Entry]
+Encoding=UTF-8
+Icon=kdevelop
+Type=Service
+ServiceTypes=KCModule
+
+X-KDE-ModuleType=Library
+X-KDE-Library=kcm_kdev_makebuilder
+X-KDE-FactoryName=kcm_kdev_makebuilder
+X-KDE-ParentApp=kdevplatformproject
+X-KDE-ParentComponents=KDevMakeBuilder
+X-KDE-CfgDlgHierarchy=BUILDTOOL
+
+Name=Make
+Name[ne]=बनाउनुहोस्
+Name[x-test]=xxMakexx
+Comment=Configure Make settings
+Comment[de]=Make Einstellungen
+Comment[el]=Ρύθμιση επιλογών Make
+Comment[es]=Configurar las preferencias de make
+Comment[fa]=پیکربندی تنظیمات Make
+Comment[fr]=Configurer les options de Make
+Comment[ga]=Cumraigh socruithe Make
+Comment[gl]=Configura os parámetros de Make
+Comment[it]=Configura le impostazioni di Make
+Comment[ja]=Make のオプションを設定
+Comment[ko]=Make 설정을 편집합니다
+Comment[nds]=Make instellen
+Comment[ne]=बनाउने सेटिङ कन्फिगर गर्नुहोस्
+Comment[pl]=Ustawienia programu make
+Comment[pt]=Configurar as opções do Make
+Comment[pt_BR]=Configurar as opções do Make
+Comment[sv]=Anpassa inställningar för Make
+Comment[tr]=Make ayarlarını yapılandır
+Comment[uk]=Налаштувати параметри Make
+Comment[x-test]=xxConfigure Make settingsxx
+Comment[zh_CN]=配置 Make 设置
+Comment[zh_TW]=設定 Make
+

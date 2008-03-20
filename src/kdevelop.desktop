@@ -1,0 +1,25 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Exec=kdevelop %u
+MimeType=application/x-kdevelop;
+Icon=kdevelop
+X-DocPath=kdevelop/index.html
+Terminal=false
+Name=KDevelop 4
+Name[fr]=KDevelop 4
+Name[ne]=केडीई विकास ४
+Name[x-test]=xxKDevelop 4xx
+GenericName=IDE
+GenericName[da]=Integreret udviklingsmiljø
+GenericName[hu]=Fejlesztőkörnyezet
+GenericName[nds]=Programmsmeed
+GenericName[ne]=आईडीई
+GenericName[ru]=Интегрированная среда разработки
+GenericName[sv]=Utvecklingsmiljö
+GenericName[tr]=Bütünleşik Geliştirme Ortamı
+GenericName[x-test]=xxIDExx
+GenericName[zh_CN]=集成开发环境
+GenericName[zh_TW]=整合開發環境
+Categories=Qt;KDE;Development;IDE;X-KDE-KDevelopIDE;
+

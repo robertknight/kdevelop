@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE kcfg SYSTEM "http://www.kde.org/standards/kcfg/1.0/kcfg.dtd">
+<kcfg>
+  <kcfgfile arg="true"/>
+  <group name="CMake">
+    <entry name="buildDirs" key="BuildDirs" type="PathList" />
+    <entry name="currentBuildDir" key="CurrentBuildDir" type="Url" />
+    <entry name="currentInstallDir" key="CurrentInstallDir" type="Url" />
+    <entry name="cmakeDir" key="CMakeDir" type="Url" />
+    
+    <entry name="cmakeBin" key="Current CMake Binary" type="Url" />
+  </group>
+</kcfg>

@@ -1,0 +1,4 @@
+macro_optional_add_subdirectory(cmake)
+#add_subdirectory(automake)
+macro_optional_add_subdirectory(qmake)
+macro_optional_add_subdirectory(custommake)
