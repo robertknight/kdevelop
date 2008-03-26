@@ -200,6 +200,16 @@ struct AST
     *This is usually not filled for all AST's, only for those that open a new context
     */
   KDevelop::DUContext* ducontext;
+
+  /** 
+   * Array of type names for the different types of AST nodes. 
+   * The type name for an AST node can be retrieved using 
+   *
+   * @code
+   * 	AST::kindNames[node->kind] 
+   * @endcode
+   */
+  static const char* kindNames[];
 };
 
 struct CommentAST {

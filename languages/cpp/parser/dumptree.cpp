@@ -25,83 +25,6 @@
 
 #include <kdebug.h>
 
-static char const * const names[] = {
-  0,
-  "AccessSpecifier",
-  "AsmDefinition",
-  "BaseClause",
-  "BaseSpecifier",
-  "BinaryExpression",
-  "CastExpression",
-  "ClassMemberAccess",
-  "ClassSpecifier",
-  "CompoundStatement",
-  "Condition",
-  "ConditionalExpression",
-  "CppCastExpression",
-  "CtorInitializer",
-  "DeclarationStatement",
-  "Declarator",
-  "DeleteExpression",
-  "DoStatement",
-  "ElaboratedTypeSpecifier",
-  "EnumSpecifier",
-  "Enumerator",
-  "ExceptionSpecification",
-  "ExpressionOrDeclarationStatement",
-  "ExpressionStatement",
-  "ForStatement",
-  "FunctionCall",
-  "FunctionDefinition",
-  "IfStatement",
-  "IncrDecrExpression",
-  "InitDeclarator",
-  "Initializer",
-  "InitializerClause",
-  "LabeledStatement",
-  "LinkageBody",
-  "LinkageSpecification",
-  "MemInitializer",
-  "Name",
-  "Namespace",
-  "NamespaceAliasDefinition",
-  "NewDeclarator",
-  "NewExpression",
-  "NewInitializer",
-  "NewTypeId",
-  "Operator",
-  "OperatorFunctionId",
-  "ParameterDeclaration",
-  "ParameterDeclarationClause",
-  "PostfixExpression",
-  "PrimaryExpression",
-  "PtrOperator",
-  "PtrToMember",
-  "ReturnStatement",
-  "SimpleDeclaration",
-  "SimpleTypeSpecifier",
-  "SizeofExpression",
-  "StringLiteral",
-  "SubscriptExpression",
-  "SwitchStatement",
-  "TemplateArgument",
-  "TemplateDeclaration",
-  "TemplateParameter",
-  "ThrowExpression",
-  "TranslationUnit",
-  "TryBlockStatement",
-  "TypeId",
-  "TypeIdentification",
-  "TypeParameter",
-  "Typedef",
-  "UnaryExpression",
-  "UnqualifiedName",
-  "Using",
-  "UsingDirective",
-  "WhileStatement",
-  "WinDeclSpec"
-};
-
 DumpTree::DumpTree()
   : m_tokenStream(0), indent(0)
 {
@@ -124,7 +47,7 @@ void DumpTree::visit(AST *node)
     }
   }
   if (node)
-    kDebug(9007) << QString(indent * 2, ' ').toLatin1().constData() << names[node->kind]
+    kDebug(9007) << QString(indent * 2, ' ').toLatin1().constData() << AST::kindNames[node->kind]
              <<  "[" << node->start_token << "," << node->end_token << "]" << nodeText << endl;
 
   ++indent;
@@ -132,7 +55,7 @@ void DumpTree::visit(AST *node)
   --indent;
 
   if (node)
-    kDebug(9007) << QString(indent * 2, ' ').toLatin1().constData() << names[node->kind];
+    kDebug(9007) << QString(indent * 2, ' ').toLatin1().constData() << AST::kindNames[node->kind];
 }
 
 DumpTree::~ DumpTree( )
