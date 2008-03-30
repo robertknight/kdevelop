@@ -83,23 +83,14 @@ void XmlWriterVisitor::visitPrimaryExpression(PrimaryExpressionAST* node)
 	m_streamWriter->writeCharacters(tokenString(node->token));
 	DefaultVisitor::visitPrimaryExpression(node);
 }
+void XmlWriterVisitor::visitAccessSpecifier(AccessSpecifierAST* node)
+{
+	m_streamWriter->writeCharacters(tokenListString(node->specs));
+}
 void XmlWriterVisitor::visitSimpleTypeSpecifier(SimpleTypeSpecifierAST* node)
 {
-	QString typeName;
-
-	// basic type names
-	const ListNode<std::size_t>* integral = node->integrals;
-	while (integral != 0)
-	{
-		typeName.append(tokenString(integral->element));
-		if (integral->next != integral->next)
-		{
-			typeName.append(' ');
-			integral = integral->next;
-		}
-		else
-			break;
-	}
+	// primitive types
+	QString typeName = tokenListString(node->integrals);
 	if (node->name)
 	{
 		if (!typeName.isEmpty())
@@ -115,4 +106,23 @@ QString XmlWriterVisitor::tokenString(std::size_t token) const
 {
 	Q_ASSERT(m_tokenStream);
 	return m_tokenStream->token(token).symbol();
+}
+QString XmlWriterVisitor::tokenListString(const ListNode<std::size_t>* list) const
+{
+	if (list != 0)
+		list = list->toFront();
+
+	QString result;
+	while (list != 0)
+	{
+		result.append(tokenString(list->element));
+		if (list->hasNext())
+		{
+			result.append(' ');
+			list = list->next;
+		}
+		else
+			break;
+	}
+	return result;
 }

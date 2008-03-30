@@ -41,9 +41,11 @@ protected:
 	virtual void visitIncrDecrExpression(IncrDecrExpressionAST*);
 	virtual void visitUnaryExpression(UnaryExpressionAST*);
 	virtual void visitPrimaryExpression(PrimaryExpressionAST*);
+	virtual void visitAccessSpecifier(AccessSpecifierAST*);
 
 private:
 	QString tokenString(std::size_t token) const;
+	QString tokenListString(const ListNode<std::size_t>* list) const;
 
 	QXmlStreamWriter* m_streamWriter;
 	TokenStream* m_tokenStream;
