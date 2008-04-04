@@ -86,7 +86,7 @@ protected:
 
 private:
 	// TypeSpecifierAST* is a base class for various type specifiers which 
-	// is not instantiated directly
+	// are not instantiated directly
 	//
 	// TODO: Merge into DefaultVisitor?
 	void visitTypeSpecifier(TypeSpecifierAST*);
