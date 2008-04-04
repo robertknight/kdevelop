@@ -209,7 +209,7 @@ struct AST
    * 	AST::kindNames[node->kind] 
    * @endcode
    */
-  static const char* kindNames[];
+  static const char* kindNames[NODE_KIND_COUNT];
 };
 
 struct CommentAST {

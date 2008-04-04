@@ -18,7 +18,7 @@
 
 #include "ast.h"
 
-const char* AST::kindNames[] = {
+const char* AST::kindNames[AST::NODE_KIND_COUNT] = {
   0,
   "AccessSpecifier",
   "AsmDefinition",
