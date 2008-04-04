@@ -120,7 +120,7 @@ void XmlWriterVisitor::visitEnumerator(EnumeratorAST* node)
 }
 void XmlWriterVisitor::visitExceptionSpecification(ExceptionSpecificationAST* node)
 {
-	// ISSUE:  What is node->ellipsis for?
+	m_streamWriter->writeAttribute("anyType",node->ellipsis > 0 ? TRUE_STR : FALSE_STR);
 	DefaultVisitor::visitExceptionSpecification(node);
 }
 void XmlWriterVisitor::visitFunctionDefinition(FunctionDefinitionAST* node)
