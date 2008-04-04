@@ -8,7 +8,6 @@ DomModel::DomItem::DomItem(const QDomNode& node, DomItem* parent)
 	memset(children,0,childCount()*sizeof(void*));
 }
 
-
 DomModel::DomItem::~DomItem()
 {
 	int count = childCount();
@@ -47,6 +46,13 @@ DomModel::DomItem* DomModel::domItem(const QModelIndex& index) const
 int DomModel::columnCount(const QModelIndex&) const
 {
 	return 1;	
+}
+QVariant DomModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+	if (section == 0 && orientation == Qt::Horizontal && role == Qt::DisplayRole)
+		return "Element";
+	else
+		return QAbstractItemModel::headerData(section,orientation,role);
 }
 QVariant DomModel::data(const QModelIndex& index, int role) const
 {

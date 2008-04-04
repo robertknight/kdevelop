@@ -34,6 +34,8 @@ private slots:
 	void recreateAST();	
 
 private:
+	void createSourceView();
+	void createASTView();
 	bool parse(const QByteArray& source, TranslationUnitAST*& ast, TokenStream*& tokenStream);
 
 	Control m_control;
