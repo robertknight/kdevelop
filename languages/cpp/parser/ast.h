@@ -51,6 +51,7 @@ struct DoStatementAST;
 struct Elaborated;
 struct EnumSpecifierAST;
 struct EnumeratorAST;
+struct ExceptionDeclarationAST;
 struct ExceptionSpecificationAST;
 struct ExpressionAST;
 struct ExpressionOrDeclarationStatementAST;
@@ -58,6 +59,7 @@ struct ExpressionStatementAST;
 struct ForStatementAST;
 struct FunctionCallAST;
 struct FunctionDefinitionAST;
+struct HandlerAST;
 struct IfStatementAST;
 struct IncrDecrExpressionAST;
 struct InitDeclaratorAST;
@@ -187,7 +189,9 @@ struct AST
       Kind_UsingDirective,                      // 71
       Kind_WhileStatement,                      // 72
       Kind_WinDeclSpec,                         // 73
-      Kind_Comment,
+      Kind_Comment,															// 74
+	  	Kind_Handler,															// 75
+			Kind_ExceptionDeclaration,								// 76
       NODE_KIND_COUNT
     };
 
@@ -278,6 +282,14 @@ struct CastExpressionAST: public ExpressionAST
 
   TypeIdAST *type_id;
   ExpressionAST *expression;
+};
+
+struct HandlerAST : public AST
+{
+	DECLARE_AST_NODE(Handler)
+
+	ExceptionDeclarationAST *declaration;
+	StatementAST *body;
 };
 
 struct ClassMemberAccessAST: public ExpressionAST
@@ -409,6 +421,15 @@ struct EnumeratorAST: public AST, public  CommentAST
 
   std::size_t id;
   ExpressionAST *expression;
+};
+
+struct ExceptionDeclarationAST : public AST
+{
+	DECLARE_AST_NODE(ExceptionDeclaration)
+
+	std::size_t ellipsis;
+	TypeSpecifierAST *type_specifier;
+	DeclaratorAST *declarator;
 };
 
 struct ExceptionSpecificationAST: public AST
@@ -787,7 +808,10 @@ struct TranslationUnitAST: public AST, public CommentAST
 
 struct TryBlockStatementAST: public StatementAST
 {
-  DECLARE_AST_NODE(TryBlockStatement)
+  	DECLARE_AST_NODE(TryBlockStatement)
+
+	StatementAST* body;
+	const ListNode<HandlerAST*> *handlers; 
 };
 
 struct TypeIdAST: public AST

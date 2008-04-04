@@ -136,7 +136,11 @@ void DefaultVisitor::visitEnumerator(EnumeratorAST *node)
 {
   visit(node->expression);
 }
-
+void DefaultVisitor::visitExceptionDeclaration(ExceptionDeclarationAST *node)
+{
+  visit(node->type_specifier);
+  visit(node->declarator);
+}
 void DefaultVisitor::visitExceptionSpecification(ExceptionSpecificationAST *node)
 {
   visitNodes(this, node->type_ids);
@@ -174,7 +178,11 @@ void DefaultVisitor::visitFunctionDefinition(FunctionDefinitionAST *node)
   visit(node->function_body);
   visit(node->win_decl_specifiers);
 }
-
+void DefaultVisitor::visitHandler(HandlerAST *node)
+{
+	visit(node->declaration);
+	visit(node->body);
+}
 void DefaultVisitor::visitIfStatement(IfStatementAST *node)
 {
   visit(node->condition);
@@ -388,9 +396,10 @@ void DefaultVisitor::visitTranslationUnit(TranslationUnitAST *node)
   visitNodes(this, node->declarations);
 }
 
-void DefaultVisitor::visitTryBlockStatement(TryBlockStatementAST *)
+void DefaultVisitor::visitTryBlockStatement(TryBlockStatementAST *node)
 {
-  // nothing to do
+  visit(node->body);
+  visitNodes(this,node->handlers);
 }
 
 void DefaultVisitor::visitTypeId(TypeIdAST *node)

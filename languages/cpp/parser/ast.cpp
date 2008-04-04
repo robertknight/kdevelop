@@ -92,6 +92,9 @@ const char* AST::kindNames[AST::NODE_KIND_COUNT] = {
   "Using",
   "UsingDirective",
   "WhileStatement",
-  "WinDeclSpec"
+  "WinDeclSpec",
+	"Comment",
+	"Handler",
+	"ExceptionDeclaration"
 };
 

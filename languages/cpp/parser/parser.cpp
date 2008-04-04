@@ -3474,50 +3474,106 @@ bool Parser::parseTypeSpecifierOrClassSpec(TypeSpecifierAST *&node)
 
 bool Parser::parseTryBlockStatement(StatementAST *&node)
 {
-#if defined(__GNUC__)
-#warning "implement me"
-#endif
   CHECK(Token_try);
 
-  StatementAST *stmt = 0;
-  if (!parseCompoundStatement(stmt))
+  StatementAST *body = 0;
+  if (!parseCompoundStatement(body))
     {
       syntaxError();
       return false;
     }
 
+	// try block must contain at least one handler
   if (session->token_stream->lookAhead() != Token_catch)
     {
-      reportError(("catch expected"));
+      reportError(("catch expected after try block"));
       return false;
     }
 
+  const ListNode<HandlerAST*> *handlers = 0;
   while (session->token_stream->lookAhead() == Token_catch)
     {
-      advance();
-      ADVANCE('(', "(");
-      ConditionAST *cond = 0;
-      if (session->token_stream->lookAhead() == Token_ellipsis)
-        {
-          advance();
-        }
-      else if (!parseCondition(cond, false))
-        {
-          reportError(("condition expected"));
-          return false;
-        }
-      ADVANCE(')', ")");
-
-      StatementAST *body = 0;
-      if (!parseCompoundStatement(body))
-        {
-          syntaxError();
-          return false;
-        }
+     	HandlerAST* handler = 0;
+			if (!parseHandler(handler))
+				{
+					syntaxError();
+					return false;
+				}
+			handlers = snoc(handlers, handler, session->mempool);
     }
 
-  node = stmt;
-  return true;
+	TryBlockStatementAST *ast = CreateNode<TryBlockStatementAST>(session->mempool);
+	ast->body = body;
+	ast->handlers = handlers;
+
+  node = ast;
+  
+	return true;
+}
+bool Parser::parseExceptionDeclaration(ExceptionDeclarationAST *&node)
+{
+	TypeSpecifierAST *type_specifier = 0;
+	DeclaratorAST *declarator = 0;
+
+	std::size_t ellipsis = 0; 
+  if (session->token_stream->lookAhead() == Token_ellipsis)
+    {
+			ellipsis = session->token_stream->cursor();
+      advance();
+    }
+  else  
+    {
+			if (!parseTypeSpecifier(type_specifier))
+				{
+					syntaxError();
+					return false;
+				}
+				
+			int index = session->token_stream->cursor();
+
+			if (!parseDeclarator(declarator))
+			{
+				rewind(index);
+				parseAbstractDeclarator(declarator);
+			}
+    }
+
+	ExceptionDeclarationAST* ast = CreateNode<ExceptionDeclarationAST>(session->mempool);
+	ast->type_specifier = type_specifier;
+	ast->declarator = declarator;
+	ast->ellipsis = ellipsis;
+
+	node = ast;
+
+	return true;
+}
+bool Parser::parseHandler(HandlerAST *&node)
+{
+	CHECK(Token_catch);
+
+  ADVANCE('(', "(");
+	ExceptionDeclarationAST* declaration = 0;
+	if (!parseExceptionDeclaration(declaration))
+		{
+			syntaxError();
+			return false;
+		}
+  ADVANCE(')', ")");
+
+  StatementAST *body = 0;
+  if (!parseCompoundStatement(body))
+    {
+      syntaxError();
+      return false;
+    }
+
+  HandlerAST *ast = CreateNode<HandlerAST>(session->mempool);
+	ast->declaration = declaration;
+	ast->body = body;
+
+	node = ast;
+
+	return true;
 }
 
 bool Parser::parsePrimaryExpression(ExpressionAST *&node)

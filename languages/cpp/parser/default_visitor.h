@@ -48,11 +48,13 @@ protected:
   virtual void visitElaboratedTypeSpecifier(ElaboratedTypeSpecifierAST *);
   virtual void visitEnumSpecifier(EnumSpecifierAST *);
   virtual void visitEnumerator(EnumeratorAST *);
+	virtual void visitExceptionDeclaration(ExceptionDeclarationAST *);
   virtual void visitExceptionSpecification(ExceptionSpecificationAST *);
   virtual void visitExpressionOrDeclarationStatement(ExpressionOrDeclarationStatementAST *);
   virtual void visitExpressionStatement(ExpressionStatementAST *);
   virtual void visitForStatement(ForStatementAST *);
   virtual void visitFunctionCall(FunctionCallAST *);
+	virtual void visitHandler(HandlerAST *);
   virtual void visitFunctionDefinition(FunctionDefinitionAST *);
   virtual void visitIfStatement(IfStatementAST *);
   virtual void visitIncrDecrExpression(IncrDecrExpressionAST *);

@@ -118,6 +118,7 @@ public:
   bool parseEnumerator(EnumeratorAST *&node);
   bool parseEqualityExpression(ExpressionAST *&node,
 			       bool templArgs = false);
+	bool parseExceptionDeclaration(ExceptionDeclarationAST *&node);
   bool parseExceptionSpecification(ExceptionSpecificationAST *&node);
   bool parseExclusiveOrExpression(ExpressionAST *&node,
 				  bool templArgs = false);
@@ -129,6 +130,7 @@ public:
   bool parseForeachStatement(StatementAST *&node);
   bool parseFunctionBody(StatementAST *&node);
   bool parseFunctionSpecifier(const ListNode<std::size_t> *&node);
+	bool parseHandler(HandlerAST *&node);
   bool parseIfStatement(StatementAST *&node);
   bool parseInclusiveOrExpression(ExpressionAST *&node,
 				  bool templArgs = false);
