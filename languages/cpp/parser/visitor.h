@@ -104,8 +104,9 @@ protected:
   virtual void visitUsingDirective(UsingDirectiveAST *) {}
   virtual void visitWhileStatement(WhileStatementAST *) {}
   virtual void visitWinDeclSpec(WinDeclSpecAST *) {}
-	virtual void visitHandler(HandlerAST *) {}
+  virtual void visitHandler(HandlerAST *) {}
 	virtual void visitExceptionDeclaration(ExceptionDeclarationAST *) {}
+  virtual void visitFunctionTryBlock(FunctionTryBlockAST *) {}
 
 private:
   typedef void (Visitor::*visitor_fun_ptr)(AST *);

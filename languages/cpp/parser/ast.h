@@ -59,6 +59,7 @@ struct ExpressionStatementAST;
 struct ForStatementAST;
 struct FunctionCallAST;
 struct FunctionDefinitionAST;
+struct FunctionTryBlockAST;
 struct HandlerAST;
 struct IfStatementAST;
 struct IncrDecrExpressionAST;
@@ -192,6 +193,7 @@ struct AST
       Kind_Comment,															// 74
 	  	Kind_Handler,															// 75
 			Kind_ExceptionDeclaration,								// 76
+      Kind_FunctionTryBlock,                    // 77
       NODE_KIND_COUNT
     };
 
@@ -477,6 +479,17 @@ struct FunctionDefinitionAST: public DeclarationAST
   StatementAST *function_body;
   WinDeclSpecAST *win_decl_specifiers;
   CtorInitializerAST *constructor_initializers;
+};
+
+struct FunctionTryBlockAST : public StatementAST
+{
+  DECLARE_AST_NODE(FunctionTryBlock)
+
+  // constructor initializers (if present) are stored in the parent
+  // FunctionDefinitionAST to avoid duplication
+
+  StatementAST *body;
+  const ListNode<HandlerAST*> *handlers;
 };
 
 //ForStatementAST is also used for foreach statements, but for them only init_statement is non-zero.

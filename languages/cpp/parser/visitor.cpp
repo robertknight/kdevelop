@@ -95,7 +95,8 @@ Visitor::visitor_fun_ptr Visitor::_S_table[AST::NODE_KIND_COUNT] = {
   reinterpret_cast<Visitor::visitor_fun_ptr>(&Visitor::visitWinDeclSpec),
 	0, // Kind_Comment
 	reinterpret_cast<Visitor::visitor_fun_ptr>(&Visitor::visitHandler),
-	reinterpret_cast<Visitor::visitor_fun_ptr>(&Visitor::visitExceptionDeclaration)
+	reinterpret_cast<Visitor::visitor_fun_ptr>(&Visitor::visitExceptionDeclaration),
+  reinterpret_cast<Visitor::visitor_fun_ptr>(&Visitor::visitFunctionTryBlock)
 };
 
 Visitor::Visitor()

@@ -178,6 +178,11 @@ void DefaultVisitor::visitFunctionDefinition(FunctionDefinitionAST *node)
   visit(node->function_body);
   visit(node->win_decl_specifiers);
 }
+void DefaultVisitor::visitFunctionTryBlock(FunctionTryBlockAST *node)
+{
+  visit(node->body);
+  visitNodes(this,node->handlers);
+}
 void DefaultVisitor::visitHandler(HandlerAST *node)
 {
 	visit(node->declaration);
