@@ -118,6 +118,11 @@ void XmlWriterVisitor::visitEnumerator(EnumeratorAST* node)
 	m_streamWriter->writeAttribute("identifier",tokenString(node->id));
 	DefaultVisitor::visitEnumerator(node);
 }
+void XmlWriterVisitor::visitExceptionDeclaration(ExceptionDeclarationAST* node)
+{
+	m_streamWriter->writeAttribute("anyType",node->ellipsis > 0 ? TRUE_STR : FALSE_STR);
+	DefaultVisitor::visitExceptionDeclaration(node);
+}
 void XmlWriterVisitor::visitExceptionSpecification(ExceptionSpecificationAST* node)
 {
 	m_streamWriter->writeAttribute("anyType",node->ellipsis > 0 ? TRUE_STR : FALSE_STR);
