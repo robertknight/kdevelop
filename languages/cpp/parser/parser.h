@@ -130,7 +130,9 @@ public:
   bool parseForeachStatement(StatementAST *&node);
   bool parseFunctionBody(StatementAST *&node);
   bool parseFunctionSpecifier(const ListNode<std::size_t> *&node);
+  bool parseFunctionTryBlock(StatementAST *&node, CtorInitializerAST *&ctorInitNode);
 	bool parseHandler(HandlerAST *&node);
+  bool parseHandlerList(const ListNode<HandlerAST*> *&node);
   bool parseIfStatement(StatementAST *&node);
   bool parseInclusiveOrExpression(ExpressionAST *&node,
 				  bool templArgs = false);

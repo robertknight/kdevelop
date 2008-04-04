@@ -56,6 +56,7 @@ protected:
   virtual void visitFunctionCall(FunctionCallAST *);
 	virtual void visitHandler(HandlerAST *);
   virtual void visitFunctionDefinition(FunctionDefinitionAST *);
+  virtual void visitFunctionTryBlock(FunctionTryBlockAST *);
   virtual void visitIfStatement(IfStatementAST *);
   virtual void visitIncrDecrExpression(IncrDecrExpressionAST *);
   virtual void visitInitDeclarator(InitDeclaratorAST *);

@@ -95,6 +95,7 @@ const char* AST::kindNames[AST::NODE_KIND_COUNT] = {
   "WinDeclSpec",
 	"Comment",
 	"Handler",
-	"ExceptionDeclaration"
+	"ExceptionDeclaration",
+  "FunctionTryBlock"
 };
 

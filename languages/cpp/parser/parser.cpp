@@ -3269,12 +3269,18 @@ bool Parser::parseDeclarationInternal(DeclarationAST *&node)
               return true;
 
             case ':':
+            case Token_try:
               {
                 CtorInitializerAST *ctorInit = 0;
                 StatementAST *funBody = 0;
+    
+                bool result;
+                if (session->token_stream->lookAhead() == ':')
+                   result = parseCtorInitializer(ctorInit) && parseFunctionBody(funBody);
+                else
+                   result = parseFunctionTryBlock(funBody,ctorInit);
 
-                if (parseCtorInitializer(ctorInit)
-                    && parseFunctionBody(funBody))
+                if (result)
                   {
                     FunctionDefinitionAST *ast
                       = CreateNode<FunctionDefinitionAST>(session->mempool);
@@ -3372,7 +3378,9 @@ bool Parser::parseDeclarationInternal(DeclarationAST *&node)
 
       if (session->token_stream->lookAhead() != ';')
         {
-          if (parseInitDeclarator(decl) && session->token_stream->lookAhead() == '{')
+          if (parseInitDeclarator(decl) && 
+                ( session->token_stream->lookAhead() == '{' ||
+                  session->token_stream->lookAhead() == Token_try ))
             {
               // function definition
               maybeFunctionDefinition = true;
@@ -3408,6 +3416,7 @@ bool Parser::parseDeclarationInternal(DeclarationAST *&node)
           return true;
 
         case '{':
+        case Token_try:
           {
             if (!maybeFunctionDefinition)
               {
@@ -3416,7 +3425,19 @@ bool Parser::parseDeclarationInternal(DeclarationAST *&node)
               }
 
             StatementAST *funBody = 0;
-            if (parseFunctionBody(funBody))
+            CtorInitializerAST *ctorInit = 0;
+            bool result;
+            
+            if (session->token_stream->lookAhead() == '{')
+                result = parseFunctionBody(funBody);
+            else
+              {
+                // try block may not have ctor init here because this function
+                // was declared with a type specifier so it is not a constructor
+                result = parseFunctionTryBlock(funBody,ctorInit) && !ctorInit;
+              }
+
+            if (result)
               {
                 FunctionDefinitionAST *ast
                   = CreateNode<FunctionDefinitionAST>(session->mempool);
@@ -3459,7 +3480,32 @@ bool Parser::parseFunctionBody(StatementAST *&node)
 
   return parseCompoundStatement(node);
 }
+bool Parser::parseFunctionTryBlock(StatementAST *&node, CtorInitializerAST *&ctorInitNode)
+{
+   CHECK(Token_try);
+   
+   CtorInitializerAST *ctorInit = 0;
+   if (session->token_stream->lookAhead() == ':')
+      if (!parseCtorInitializer(ctorInit))
+        return false;
 
+   StatementAST *body = 0;
+   if (!parseFunctionBody(body))
+      return false;
+
+   const ListNode<HandlerAST*>* handlers = 0;
+   if (!parseHandlerList(handlers))
+       return false;
+   
+   FunctionTryBlockAST *ast = CreateNode<FunctionTryBlockAST>(session->mempool);
+   ast->body = body;
+   ast->handlers = handlers;
+
+   node = ast;
+   ctorInitNode = ctorInit;
+
+   return true;
+}
 bool Parser::parseTypeSpecifierOrClassSpec(TypeSpecifierAST *&node)
 {
   if (parseClassSpecifier(node))
@@ -3483,25 +3529,10 @@ bool Parser::parseTryBlockStatement(StatementAST *&node)
       return false;
     }
 
-	// try block must contain at least one handler
-  if (session->token_stream->lookAhead() != Token_catch)
-    {
-      reportError(("catch expected after try block"));
-      return false;
-    }
-
   const ListNode<HandlerAST*> *handlers = 0;
-  while (session->token_stream->lookAhead() == Token_catch)
-    {
-     	HandlerAST* handler = 0;
-			if (!parseHandler(handler))
-				{
-					syntaxError();
-					return false;
-				}
-			handlers = snoc(handlers, handler, session->mempool);
-    }
-
+  if (!parseHandlerList(handlers))
+      return false;
+	
 	TryBlockStatementAST *ast = CreateNode<TryBlockStatementAST>(session->mempool);
 	ast->body = body;
 	ast->handlers = handlers;
@@ -3549,8 +3580,7 @@ bool Parser::parseExceptionDeclaration(ExceptionDeclarationAST *&node)
 }
 bool Parser::parseHandler(HandlerAST *&node)
 {
-	CHECK(Token_catch);
-
+  CHECK(Token_catch);
   ADVANCE('(', "(");
 	ExceptionDeclarationAST* declaration = 0;
 	if (!parseExceptionDeclaration(declaration))
@@ -3571,9 +3601,34 @@ bool Parser::parseHandler(HandlerAST *&node)
 	ast->declaration = declaration;
 	ast->body = body;
 
-	node = ast;
+  node = ast;
 
 	return true;
+}
+bool Parser::parseHandlerList(const ListNode<HandlerAST*> *&node)
+{
+  // try block must contain at least one handler
+  if (session->token_stream->lookAhead() != Token_catch)
+    {
+      reportError(("catch expected after try block"));
+      return false;
+    }
+
+  const ListNode<HandlerAST*> *handlers = 0;
+  while (session->token_stream->lookAhead() == Token_catch)
+    {
+     	HandlerAST* handler = 0;
+			if (!parseHandler(handler))
+				{
+					syntaxError();
+					return false;
+				}
+			handlers = snoc(handlers, handler, session->mempool);
+    }
+
+  node = handlers;
+
+  return true;
 }
 
 bool Parser::parsePrimaryExpression(ExpressionAST *&node)
