@@ -78,6 +78,7 @@ void XmlWriterVisitor::visitClassMemberAccess(ClassMemberAccessAST* node)
 }
 void XmlWriterVisitor::visitClassSpecifier(ClassSpecifierAST* node)
 {
+	visitTypeSpecifier(node);
 	m_streamWriter->writeAttribute("type",tokenString(node->class_key));
 	DefaultVisitor::visitClassSpecifier(node);
 }
@@ -101,8 +102,14 @@ void XmlWriterVisitor::visitUnqualifiedName(UnqualifiedNameAST* node)
 	m_streamWriter->writeCharacters(tokenString(node->tilde) + tokenString(node->id));
 	DefaultVisitor::visitUnqualifiedName(node);
 }
+void XmlWriterVisitor::visitEnumSpecifier(EnumSpecifierAST* node)
+{
+	visitTypeSpecifier(node);
+	DefaultVisitor::visitEnumSpecifier(node);
+}
 void XmlWriterVisitor::visitElaboratedTypeSpecifier(ElaboratedTypeSpecifierAST* node)
 {
+	visitTypeSpecifier(node);
 	m_streamWriter->writeAttribute("type",tokenString(node->type));
 	DefaultVisitor::visitElaboratedTypeSpecifier(node);
 }
@@ -205,8 +212,14 @@ void XmlWriterVisitor::visitUsing(UsingAST* node)
 	m_streamWriter->writeAttribute("name",tokenString(node->type_name));
 	DefaultVisitor::visitUsing(node);
 }
+void XmlWriterVisitor::visitTypeSpecifier(TypeSpecifierAST* node)
+{
+	m_streamWriter->writeAttribute("cvqualifiers",tokenListString(node->cv));
+}
 void XmlWriterVisitor::visitSimpleTypeSpecifier(SimpleTypeSpecifierAST* node)
 {
+	visitTypeSpecifier(node);
+	
 	// primitive types
 	QString typeName = tokenListString(node->integrals);
 	if (node->name)
@@ -250,3 +263,4 @@ QString XmlWriterVisitor::tokenListString(const ListNode<std::size_t>* list) con
 	}
 	return result;
 }
+

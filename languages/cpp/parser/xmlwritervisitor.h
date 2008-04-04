@@ -62,6 +62,7 @@ protected:
 	virtual void visitDeleteExpression(DeleteExpressionAST*);
 	virtual void visitElaboratedTypeSpecifier(ElaboratedTypeSpecifierAST*);
 	virtual void visitEnumerator(EnumeratorAST*);
+	virtual void visitEnumSpecifier(EnumSpecifierAST*);
 	virtual void visitExceptionSpecification(ExceptionSpecificationAST*);
 	virtual void visitFunctionDefinition(FunctionDefinitionAST*);
 	virtual void visitIncrDecrExpression(IncrDecrExpressionAST*);
@@ -84,6 +85,12 @@ protected:
 	virtual void visitWinDeclSpec(WinDeclSpecAST*);
 
 private:
+	// TypeSpecifierAST* is a base class for various type specifiers which 
+	// is not instantiated directly
+	//
+	// TODO: Merge into DefaultVisitor?
+	void visitTypeSpecifier(TypeSpecifierAST*);
+
 	// returns the text of a token in m_tokenStream 
 	QString tokenString(std::size_t token) const;
 	// returns the text of a list of tokens in m_tokenStream
