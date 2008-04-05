@@ -4,6 +4,8 @@
 
 // Qt
 #include <QBuffer>
+#include <QDockWidget>
+#include <QListWidget>
 #include <QTreeView>
 #include <QHBoxLayout>
 #include <QtDebug>
@@ -27,6 +29,7 @@
 #include "dommodel.h"
 
 using namespace ASTView;
+using namespace KDevelop;
 
 MainWindow::MainWindow()
 	: m_lastParseSession(0)
@@ -39,9 +42,17 @@ MainWindow::MainWindow()
 
 	createSourceView();
 	createASTView();
+	createProblemView();
 	
 	layout->addWidget(m_sourceView);
 	layout->addWidget(m_astView);
+}
+void MainWindow::createProblemView()
+{
+	QDockWidget* problemDock = new QDockWidget("Problems",this);
+	m_parseProblemView = new QListWidget;
+	problemDock->setWidget(m_parseProblemView);
+	addDockWidget(Qt::BottomDockWidgetArea,problemDock);
 }
 void MainWindow::createSourceView()
 {
@@ -69,6 +80,7 @@ void MainWindow::createASTView()
 }
 void MainWindow::recreateAST()
 {
+	m_control = Control();
 	XmlWriterVisitor writer;
 	TranslationUnitAST* ast;
 	TokenStream* tokenStream;
@@ -82,10 +94,42 @@ void MainWindow::recreateAST()
 		xmlDoc.setContent(buffer.data());
 		
 		m_astModel->setDomNode(xmlDoc);
+
+		updateProblemList();
 	}
 	m_astView->expandAll();
 }
+void MainWindow::updateProblemList()
+{
+	m_parseProblemView->clear();
+	foreach(KDevelop::ProblemPointer problem,m_control.problems())
+	{
+		QString description;
+		
+		switch (problem->source())
+		{
+			case Problem::Lexer:
+				description += "Lexer";
+				break;
+			case Problem::Parser:
+				description += "Parser";
+				break;
+			case Problem::Preprocessor:
+				description += "Pre-processor";
+				break;
+			default:
+				description += "Unknown";
+		}
 
+		description += ": ";
+		description += problem->description();
+
+		if (!problem->explanation().isEmpty())
+			description += '(' + problem->explanation() + ')';
+		
+		m_parseProblemView->addItem(description);
+	}
+}
 bool MainWindow::parse(const QByteArray& source, TranslationUnitAST*& ast,
 					   TokenStream*& tokenStream)
 {
