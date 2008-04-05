@@ -26,6 +26,7 @@
 
 // CPP Parser
 #include "lexer.h"
+#include "tokens.h"
 
 const char* XmlWriterVisitor::TRUE_STR = "1";
 const char* XmlWriterVisitor::FALSE_STR = "0";
@@ -170,6 +171,14 @@ void XmlWriterVisitor::visitIncrDecrExpression(IncrDecrExpressionAST* node)
 {
 	m_streamWriter->writeAttribute("operator",tokenString(node->op));
 	DefaultVisitor::visitIncrDecrExpression(node);
+}
+void XmlWriterVisitor::visitJumpStatement(JumpStatementAST* node)
+{
+  m_streamWriter->writeAttribute("operator",tokenString(node->op));
+  if (m_tokenStream->kind(node->op) == Token_goto)
+    m_streamWriter->writeAttribute("identifier",tokenString(node->identifier));
+
+  DefaultVisitor::visitJumpStatement(node);
 }
 void XmlWriterVisitor::visitParameterDeclarationClause(ParameterDeclarationClauseAST* node)
 {

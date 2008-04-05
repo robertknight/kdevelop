@@ -66,6 +66,7 @@ struct IncrDecrExpressionAST;
 struct InitDeclaratorAST;
 struct InitializerAST;
 struct InitializerClauseAST;
+struct JumpStatementAST;
 struct LabeledStatementAST;
 struct LinkageBodyAST;
 struct LinkageSpecificationAST;
@@ -194,6 +195,7 @@ struct AST
 	  	Kind_Handler,															// 75
 			Kind_ExceptionDeclaration,								// 76
       Kind_FunctionTryBlock,                    // 77
+      Kind_JumpStatement,                       // 78
       NODE_KIND_COUNT
     };
 
@@ -718,6 +720,18 @@ struct PtrOperatorAST: public AST
 struct PtrToMemberAST: public AST
 {
   DECLARE_AST_NODE(PtrToMember)
+};
+
+struct JumpStatementAST : public StatementAST
+{
+  DECLARE_AST_NODE(JumpStatement)
+
+  // index of operator token which describes the jump, one of
+  // 'break', 'continue' or 'goto.  Return statements are handled by
+  // ReturnStatementAST
+  std::size_t op;
+  // identifier for 'goto' statements
+  std::size_t identifier;
 };
 
 struct ReturnStatementAST: public StatementAST

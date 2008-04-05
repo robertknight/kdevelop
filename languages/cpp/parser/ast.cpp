@@ -96,6 +96,7 @@ const char* AST::kindNames[AST::NODE_KIND_COUNT] = {
 	"Comment",
 	"Handler",
 	"ExceptionDeclaration",
-  "FunctionTryBlock"
+  "FunctionTryBlock",
+  "JumpStatement"
 };
 
