@@ -271,12 +271,12 @@ void Parser::tokenRequiredError(int token)
 {
   QString err;
 
-  err += "expected token ";
-  err += "``";
+  err += "Expected token ";
+  err += '\'';
   err += token_name(token);
-  err += "'' found ``";
+  err += "\' found \'";
   err += token_name(session->token_stream->lookAhead());
-  err += "''";
+  err += '\'';
 
   reportError(err);
 }
@@ -285,10 +285,10 @@ void Parser::syntaxError()
 {
   QString err;
 
-  err += "unexpected token ";
-  err += "``";
+  err += "Unexpected token ";
+  err += '\'';
   err += token_name(session->token_stream->lookAhead());
-  err += "''";
+  err += '\'';
 
   reportError(err);
 }
@@ -756,7 +756,7 @@ bool Parser::parseNamespace(DeclarationAST *&node)
         }
       else
         {
-          reportError(("namespace expected"));
+          reportError(("Namespace expected"));
           return false;
         }
     }
@@ -986,7 +986,7 @@ bool Parser::parseTemplateDeclaration(DeclarationAST *&node)
   DeclarationAST *declaration = 0;
   if (!parseDeclaration(declaration))
     {
-      reportError(("expected a declaration"));
+      reportError(("Expected a declaration"));
     }
 
   TemplateDeclarationAST *ast = CreateNode<TemplateDeclarationAST>(session->mempool);
@@ -3007,7 +3007,7 @@ bool Parser::parseIfStatement(StatementAST *&node)
   ConditionAST *cond = 0;
   if (!parseCondition(cond))
     {
-      reportError(("condition expected"));
+      reportError(("Condition expected"));
       return false;
     }
   ADVANCE(')', ")");
@@ -3015,7 +3015,7 @@ bool Parser::parseIfStatement(StatementAST *&node)
   StatementAST *stmt = 0;
   if (!parseStatement(stmt))
     {
-      reportError(("statement expected"));
+      reportError(("Statement expected"));
       return false;
     }
 
@@ -3028,7 +3028,7 @@ bool Parser::parseIfStatement(StatementAST *&node)
 
       if (!parseStatement(ast->else_statement))
         {
-          reportError(("statement expected"));
+          reportError(("Statement expected"));
           return false;
         }
     }
@@ -3049,7 +3049,7 @@ bool Parser::parseSwitchStatement(StatementAST *&node)
   ConditionAST *cond = 0;
   if (!parseCondition(cond))
     {
-      reportError(("condition expected"));
+      reportError(("Condition expected"));
       return false;
     }
   ADVANCE(')', ")");
@@ -3099,7 +3099,7 @@ bool Parser::parseLabeledStatement(StatementAST *&node)
         ExpressionAST *expr = 0;
         if (!parseConstantExpression(expr))
           {
-            reportError(("expression expected"));
+            reportError(("Expression expected"));
           }
         else if (session->token_stream->lookAhead() == Token_ellipsis)
           {
@@ -3107,7 +3107,7 @@ bool Parser::parseLabeledStatement(StatementAST *&node)
 
             if (!parseConstantExpression(expr))
               {
-                reportError(("expression expected"));
+                reportError(("Expression expected"));
               }
           }
         ADVANCE(':', ":");
@@ -3579,7 +3579,7 @@ bool Parser::parseExceptionDeclaration(ExceptionDeclarationAST *&node)
     {
 			if (!parseTypeSpecifier(type_specifier))
 				{
-					syntaxError();
+					reportError("Expected type name");
 					return false;
 				}
 				
@@ -3633,7 +3633,7 @@ bool Parser::parseHandlerList(const ListNode<HandlerAST*> *&node)
   // try block must contain at least one handler
   if (session->token_stream->lookAhead() != Token_catch)
     {
-      reportError(("catch expected after try block"));
+      reportError(("'catch' expected after try block"));
       return false;
     }
 
