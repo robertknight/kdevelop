@@ -67,6 +67,7 @@ protected:
 	virtual void visitExceptionSpecification(ExceptionSpecificationAST*);
 	virtual void visitFunctionDefinition(FunctionDefinitionAST*);
 	virtual void visitIncrDecrExpression(IncrDecrExpressionAST*);
+  virtual void visitJumpStatement(JumpStatementAST*);
 	virtual void visitLinkageSpecification(LinkageSpecificationAST*);
 	virtual void visitName(NameAST*);
 	virtual void visitNamespace(NamespaceAST*);

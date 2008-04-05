@@ -143,6 +143,7 @@ public:
   bool parseInitializer(InitializerAST *&node);
   bool parseInitializerClause(InitializerClauseAST *&node);
   bool parseInitializerList(const ListNode<InitializerClauseAST*> *&node);
+  bool parseJumpStatement(StatementAST *&node);
   bool parseLabeledStatement(StatementAST *&node);
   bool parseLinkageBody(LinkageBodyAST *&node);
   bool parseLinkageSpecification(DeclarationAST *&node);

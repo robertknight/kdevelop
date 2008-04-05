@@ -2691,6 +2691,32 @@ bool Parser::parseExpressionStatement(StatementAST *&node)
   return true;
 }
 
+bool Parser::parseJumpStatement(StatementAST *&node)
+{
+  std::size_t op = session->token_stream->cursor();
+  std::size_t kind = session->token_stream->lookAhead();
+  std::size_t identifier = 0;
+
+  if (kind != Token_break && kind != Token_continue && kind != Token_goto)
+      return false;
+ 
+  advance();
+  if (kind == Token_goto)
+    {
+      ADVANCE(Token_identifier,"label");
+      identifier = op+1;
+    }
+  ADVANCE(';',";");
+  
+  JumpStatementAST* ast = CreateNode<JumpStatementAST>(session->mempool);
+  ast->op = op;
+  ast->identifier = identifier;
+
+  UPDATE_POS(ast,ast->op,_M_last_valid_token+1);
+  node = ast;
+  return true;
+}
+
 bool Parser::parseStatement(StatementAST *&node)
 {
   std::size_t start = session->token_stream->cursor();
@@ -2722,21 +2748,8 @@ bool Parser::parseStatement(StatementAST *&node)
 
     case Token_break:
     case Token_continue:
-#if defined(__GNUC__)
-#warning "implement me"
-#endif
-      advance();
-      ADVANCE(';', ";");
-      return true;
-
     case Token_goto:
-#if defined(__GNUC__)
-#warning "implement me"
-#endif
-      advance();
-      ADVANCE(Token_identifier, "identifier");
-      ADVANCE(';', ";");
-      return true;
+      return parseJumpStatement(node);
 
     case Token_return:
       {

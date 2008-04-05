@@ -107,6 +107,7 @@ protected:
   virtual void visitHandler(HandlerAST *) {}
 	virtual void visitExceptionDeclaration(ExceptionDeclarationAST *) {}
   virtual void visitFunctionTryBlock(FunctionTryBlockAST *) {}
+  virtual void visitJumpStatement(JumpStatementAST *) {}
 
 private:
   typedef void (Visitor::*visitor_fun_ptr)(AST *);
