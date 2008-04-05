@@ -3570,6 +3570,8 @@ bool Parser::parseFunctionBody(StatementAST *&node)
 }
 bool Parser::parseFunctionTryBlock(StatementAST *&node, CtorInitializerAST *&ctorInitNode)
 {
+   std::size_t start = session->token_stream->cursor();
+
    CHECK(Token_try);
    
    CtorInitializerAST *ctorInit = 0;
@@ -3589,6 +3591,7 @@ bool Parser::parseFunctionTryBlock(StatementAST *&node, CtorInitializerAST *&cto
    ast->body = body;
    ast->handlers = handlers;
 
+   UPDATE_POS(ast,start,_M_last_valid_token+1);
    node = ast;
    ctorInitNode = ctorInit;
 
@@ -3608,6 +3611,8 @@ bool Parser::parseTypeSpecifierOrClassSpec(TypeSpecifierAST *&node)
 
 bool Parser::parseTryBlockStatement(StatementAST *&node)
 {
+  std::size_t start = session->token_stream->cursor();
+
   CHECK(Token_try);
 
   StatementAST *body = 0;
@@ -3625,12 +3630,15 @@ bool Parser::parseTryBlockStatement(StatementAST *&node)
 	ast->body = body;
 	ast->handlers = handlers;
 
+  UPDATE_POS(ast, start, _M_last_valid_token+1);
   node = ast;
   
 	return true;
 }
 bool Parser::parseExceptionDeclaration(ExceptionDeclarationAST *&node)
 {
+  std::size_t start = session->token_stream->cursor();
+
 	TypeSpecifierAST *type_specifier = 0;
 	DeclaratorAST *declarator = 0;
 
@@ -3661,13 +3669,16 @@ bool Parser::parseExceptionDeclaration(ExceptionDeclarationAST *&node)
 	ast->type_specifier = type_specifier;
 	ast->declarator = declarator;
 	ast->ellipsis = ellipsis;
-
+  
+  UPDATE_POS(ast,start,_M_last_valid_token+1);
 	node = ast;
 
 	return true;
 }
 bool Parser::parseHandler(HandlerAST *&node)
 {
+  std::size_t start = session->token_stream->cursor();
+
   CHECK(Token_catch);
   ADVANCE('(', "(");
 	ExceptionDeclarationAST* declaration = 0;
@@ -3689,6 +3700,7 @@ bool Parser::parseHandler(HandlerAST *&node)
 	ast->declaration = declaration;
 	ast->body = body;
 
+  UPDATE_POS(ast, start, _M_last_valid_token+1);
   node = ast;
 
 	return true;
