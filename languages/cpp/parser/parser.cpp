@@ -82,7 +82,7 @@ Parser::Parser(Control *c)
   : control(c), lexer(control), session(0), _M_last_valid_token(0), _M_last_parsed_comment(0)
 {
   _M_max_problem_count = 5;
-  _M_block_errors = false;
+  _M_hold_errors = false;
 }
 
 Parser::~Parser()
@@ -178,7 +178,7 @@ void Parser::clearComment( ) {
 
 TranslationUnitAST *Parser::parse(ParseSession* _session)
 {
-  _M_block_errors = false;
+  _M_hold_errors = false;
   session = _session;
 
   if (!session->token_stream)
@@ -194,7 +194,7 @@ TranslationUnitAST *Parser::parse(ParseSession* _session)
 
 StatementAST *Parser::parseStatement(ParseSession* _session)
 {
-  _M_block_errors = false;
+  _M_hold_errors = false;
   session = _session;
 
   if (!session->token_stream)
@@ -210,7 +210,7 @@ StatementAST *Parser::parseStatement(ParseSession* _session)
 
 AST *Parser::parseTypeOrExpression(ParseSession* _session, bool forceExpression)
 {
-  _M_block_errors = false;
+  _M_hold_errors = false;
   session = _session;
 
   if (!session->token_stream)
@@ -307,10 +307,24 @@ void Parser::syntaxError()
 
   reportError(err);
 }
+void Parser::reportPendingErrors()
+{
+  bool hold = holdErrors(false); 
 
+  std::size_t start = session->token_stream->cursor();
+	while (m_pendingErrors.count() > 0)
+	{
+	  PendingError error = m_pendingErrors.dequeue();
+    session->token_stream->rewind(error.cursor);
+    reportError(error.message);
+	}
+  rewind(start);
+
+  holdErrors(hold);
+}
 void Parser::reportError(const QString& msg)
 {
-  if (!_M_block_errors && _M_problem_count < _M_max_problem_count)
+  if (!_M_hold_errors && _M_problem_count < _M_max_problem_count)
     {
       ++_M_problem_count;
 
@@ -326,6 +340,13 @@ void Parser::reportError(const QString& msg)
 
       control->reportProblem(p);
     }
+	else if (_M_hold_errors)
+	{
+		PendingError pending;
+		pending.message = msg;
+		pending.cursor = session->token_stream->cursor();
+		m_pendingErrors.enqueue(pending);
+	}
 }
 
 bool Parser::skipUntil(int token)
@@ -2748,7 +2769,9 @@ bool Parser::parseStatement(StatementAST *&node)
 
 bool Parser::parseExpressionOrDeclarationStatement(StatementAST *&node)
 {
-  bool blocked = block_errors(true);
+  // hold any errors while the expression/declaration ambiguity is resolved
+  // for this statement
+  bool hold = holdErrors(true);
 
   std::size_t start = session->token_stream->cursor();
 
@@ -2757,12 +2780,26 @@ bool Parser::parseExpressionOrDeclarationStatement(StatementAST *&node)
   bool maybe_amb = parseDeclarationStatement(decl_ast);
   maybe_amb &= session->token_stream->kind(session->token_stream->cursor() - 1) == ';';
 
+  // if parsing as a declaration succeeded, then any pending errors are genuine.
+  // Otherwise this is not a declaration so ignore the errors.
+  if (decl_ast)
+      reportPendingErrors();
+  else
+      m_pendingErrors.clear();
+
   std::size_t end = session->token_stream->cursor();
 
   rewind(start);
   StatementAST *expr_ast = 0;
   maybe_amb &= parseExpressionStatement(expr_ast);
   maybe_amb &= session->token_stream->kind(session->token_stream->cursor() - 1) == ';';
+
+  // if parsing as an expression succeeded, then any pending errors are genuine.
+  // Otherwise this is not an expression so ignore the errors.
+  if (expr_ast)
+      reportPendingErrors();
+  else
+      m_pendingErrors.clear();
 
   if (maybe_amb)
     {
@@ -2784,7 +2821,7 @@ bool Parser::parseExpressionOrDeclarationStatement(StatementAST *&node)
         node = expr_ast;
     }
 
-  block_errors(blocked);
+  holdErrors(hold);
 
   if (!node)
     syntaxError();
@@ -4666,9 +4703,9 @@ bool Parser::parseThrowExpression(ExpressionAST *&node)
   return true;
 }
 
-bool Parser::block_errors(bool block)
+bool Parser::holdErrors(bool hold)
 {
-  bool current = _M_block_errors;
-  _M_block_errors = block;
+  bool current = _M_hold_errors;
+  _M_hold_errors = hold;
   return current;
 }
