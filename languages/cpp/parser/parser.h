@@ -23,6 +23,7 @@
 #include "lexer.h"
 #include "commentparser.h"
 
+#include <QtCore/QSet>
 #include <QtCore/QString>
 #include <cppparserexport.h>
 
@@ -241,6 +242,11 @@ private:
   bool _M_block_errors;
   size_t _M_last_valid_token; //Last encountered token that was not a comment
   size_t _M_last_parsed_comment;
+
+  // keeps track of tokens where a syntax error has been found 
+  // so that the same error is not reported twice for a token
+  QSet<std::size_t> m_syntaxErrorTokens;
+
 private:
   Parser(const Parser& source);
   void operator = (const Parser& source);
