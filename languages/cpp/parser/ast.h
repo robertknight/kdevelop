@@ -539,7 +539,12 @@ struct InitializerClauseAST: public AST
 {
   DECLARE_AST_NODE(InitializerClause)
 
-  ExpressionAST *expression;
+  // either 'expression' or 'initializer_list' or neither are used.
+  // neither are used when the clause represents the empty initializer "{}"
+  
+  // assignment expression
+  ExpressionAST *expression; 
+  const ListNode<InitializerClauseAST*> *initializer_list;
 };
 
 struct LabeledStatementAST: public StatementAST

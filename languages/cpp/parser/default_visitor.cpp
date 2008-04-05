@@ -215,6 +215,7 @@ void DefaultVisitor::visitInitializer(InitializerAST *node)
 void DefaultVisitor::visitInitializerClause(InitializerClauseAST *node)
 {
   visit(node->expression);
+  visitNodes(this,node->initializer_list);
 }
 
 void DefaultVisitor::visitLabeledStatement(LabeledStatementAST *node)
