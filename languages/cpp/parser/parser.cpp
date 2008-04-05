@@ -274,6 +274,8 @@ void Parser::tokenRequiredError(int token)
   err += "Expected token ";
   err += '\'';
   err += token_name(token);
+  err += "\' after \'";
+  err += token_name(session->token_stream->lookAhead(-1));
   err += "\' found \'";
   err += token_name(session->token_stream->lookAhead());
   err += '\'';
@@ -2851,7 +2853,7 @@ bool Parser::parseWhileStatement(StatementAST *&node)
   ConditionAST *cond = 0;
   if (!parseCondition(cond))
     {
-      reportError(("condition expected"));
+      reportError("Condition expected");
       return false;
     }
   ADVANCE(')', ")");
@@ -2859,7 +2861,7 @@ bool Parser::parseWhileStatement(StatementAST *&node)
   StatementAST *body = 0;
   if (!parseStatement(body))
     {
-      reportError(("statement expected"));
+      reportError("Statement expected");
       return false;
     }
 
@@ -2882,7 +2884,7 @@ bool Parser::parseDoStatement(StatementAST *&node)
   StatementAST *body = 0;
   if (!parseStatement(body))
     {
-      reportError(("statement expected"));
+      reportError(("Statement expected"));
       //return false;
     }
 
@@ -2892,7 +2894,7 @@ bool Parser::parseDoStatement(StatementAST *&node)
   ExpressionAST *expr = 0;
   if (!parseCommaExpression(expr))
     {
-      reportError(("expression expected"));
+      reportError(("Expression expected"));
       //return false;
     }
 
@@ -2927,7 +2929,7 @@ bool Parser::parseForStatement(StatementAST *&node)
 
   if (!parseForInitStatement(init, tok == Token_foreach))
   {
-    reportError(("for initialization expected"));
+    reportError(("'for' initialization expected"));
     return false;
   }
   
