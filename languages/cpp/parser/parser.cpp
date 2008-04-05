@@ -283,12 +283,25 @@ void Parser::tokenRequiredError(int token)
 
 void Parser::syntaxError()
 {
+  std::size_t cursor = session->token_stream->cursor();
+  std::size_t kind = session->token_stream->lookAhead();
+
+  if (m_syntaxErrorTokens.contains(cursor))
+      return; // syntax error at this point has already been reported
+
+  m_syntaxErrorTokens.insert(cursor);
+
   QString err;
 
-  err += "Unexpected token ";
-  err += '\'';
-  err += token_name(session->token_stream->lookAhead());
-  err += '\'';
+  if (kind == Token_EOF)
+    err += "Unexpected end of file";
+  else
+  {
+    err += "Unexpected token ";
+    err += '\'';
+    err += token_name(kind);
+    err += '\'';
+  }
 
   reportError(err);
 }

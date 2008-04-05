@@ -230,7 +230,7 @@ char const *token_name(int token)
 {
   if (token == 0)
     {
-      return "eof";
+      return "end of file";
     }
   else if (token >= 32 && token <= 127)
     {
