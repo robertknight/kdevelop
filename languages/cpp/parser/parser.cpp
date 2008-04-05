@@ -2454,7 +2454,26 @@ bool Parser::parseBaseSpecifier(BaseSpecifierAST *&node)
 
   return true;
 }
+bool Parser::parseInitializerList(const ListNode<InitializerClauseAST*> *&node)
+{
+  const ListNode<InitializerClauseAST*> *list = 0;
+  do 
+    {
+      if (list)
+        advance(); // skip ',' separator between clauses
 
+      InitializerClauseAST *init_clause = 0;
+      if (!parseInitializerClause(init_clause))
+        {
+          return false;
+        }
+      list = snoc(list,init_clause,session->mempool);
+    } while (session->token_stream->lookAhead() == ',');
+
+  node = list;
+
+  return true;
+}
 bool Parser::parseInitializerClause(InitializerClauseAST *&node)
 {
   std::size_t start = session->token_stream->cursor();
@@ -2463,19 +2482,23 @@ bool Parser::parseInitializerClause(InitializerClauseAST *&node)
 
   if (session->token_stream->lookAhead() == '{')
     {
-#if defined(__GNUC__)
-#warning "implement me"
-#endif
-      if (skip('{','}'))
-        advance();
-      else
-        reportError(("} missing"));
+      advance();
+      const ListNode<InitializerClauseAST*> *initializer_list = 0;
+	    if (session->token_stream->lookAhead() != '}' && 
+            !parseInitializerList(initializer_list))
+	  	  {
+           return false; 
+		    }
+      ADVANCE('}',"}");
+      
+      ast->initializer_list = initializer_list;
     }
   else
     {
       if (!parseAssignmentExpression(ast->expression))
         {
-          //reportError(("Expression expected"));
+          reportError("Expression expected");
+          return false;
         }
     }
 
@@ -4634,5 +4657,3 @@ bool Parser::block_errors(bool block)
   _M_block_errors = block;
   return current;
 }
-
-
