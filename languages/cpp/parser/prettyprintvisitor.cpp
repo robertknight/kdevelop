@@ -650,7 +650,12 @@ void PrettyPrintVisitor::visitSwitchStatement(SwitchStatementAST* node)
 }
 void PrettyPrintVisitor::visitTemplateArgument(TemplateArgumentAST* node)
 {
-	DefaultVisitor::visitTemplateArgument(node);
+	*m_printer << '<';
+	visit(node->type_id);
+	visit(node->expression);
+	*m_printer << '>';
+	*m_printer << ' '; 	// force space so that closing nested template arrows
+						// are not treated as a right-shift ('>>') operator
 }
 void PrettyPrintVisitor::visitTemplateDeclaration(TemplateDeclarationAST* node)
 {
@@ -702,7 +707,7 @@ void PrettyPrintVisitor::visitTypeParameter(TypeParameterAST* node)
 		*m_printer << '<';
 		visitListWithSeparator(node->template_parameters,',');
 		*m_printer << '>';
-
+		*m_printer << ' '; // force space, otherwise the parser interprets '>=' as Token_geq
 		if (node->name)
 		{
 			visit(node->name);
