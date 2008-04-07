@@ -505,9 +505,13 @@ void PrettyPrintVisitor::visitNamespace(NamespaceAST* node)
 	writeToken(node,node->namespace_name);
 	visit(node->linkage_body);
 }
-void PrettyPrintVisitor::visitNamespaceAliasDefinition(NamespaceAliasDefinitionAST* )
+void PrettyPrintVisitor::visitNamespaceAliasDefinition(NamespaceAliasDefinitionAST* node)
 {
-	Q_ASSERT(0); // Not implemented yet
+	*m_printer << Token_namespace;
+	writeToken(node,node->namespace_name);
+	*m_printer << '=';
+	visit(node->alias_name);
+	*m_printer << ';';
 }
 void PrettyPrintVisitor::visitNewDeclarator(NewDeclaratorAST* node)
 {
@@ -615,9 +619,15 @@ void PrettyPrintVisitor::visitSimpleDeclaration(SimpleDeclarationAST* node)
 	visit(node->win_decl_specifiers);
 	*m_printer << ';';
 }
-void PrettyPrintVisitor::visitSizeofExpression(SizeofExpressionAST* )
+void PrettyPrintVisitor::visitSizeofExpression(SizeofExpressionAST* node)
 {
-	Q_ASSERT(0); // Not implemented yet
+	*m_printer << Token_sizeof;
+	*m_printer << '(';
+	if (node->type_id)
+		visit(node->type_id);
+	else
+		visit(node->expression);
+	*m_printer << ')';
 }
 void PrettyPrintVisitor::visitStringLiteral(StringLiteralAST* node)
 {
@@ -642,13 +652,21 @@ void PrettyPrintVisitor::visitTemplateArgument(TemplateArgumentAST* node)
 {
 	DefaultVisitor::visitTemplateArgument(node);
 }
-void PrettyPrintVisitor::visitTemplateDeclaration(TemplateDeclarationAST* )
+void PrettyPrintVisitor::visitTemplateDeclaration(TemplateDeclarationAST* node)
 {
-	Q_ASSERT(0); // Not implemented yet
+	writeToken(node,node->exported);
+	*m_printer << Token_template;
+	if (node->template_parameters)
+	{
+		*m_printer << '<';
+		visitListWithSeparator(node->template_parameters,',');	
+		*m_printer << '>';
+	}
+	visit(node->declaration);
 }
-void PrettyPrintVisitor::visitTemplateParameter(TemplateParameterAST* )
+void PrettyPrintVisitor::visitTemplateParameter(TemplateParameterAST* node)
 {
-	Q_ASSERT(0); // Not implemented yet
+	DefaultVisitor::visitTemplateParameter(node);	
 }
 void PrettyPrintVisitor::visitThrowExpression(ThrowExpressionAST* node)
 {
@@ -665,9 +683,41 @@ void PrettyPrintVisitor::visitTypeId(TypeIdAST* node)
 {
 	DefaultVisitor::visitTypeId(node);
 }
-void PrettyPrintVisitor::visitTypeParameter(TypeParameterAST* )
+void PrettyPrintVisitor::visitTypeParameter(TypeParameterAST* node)
 {
-	Q_ASSERT(0); // Not implemented yet
+	int kind = m_tokenLookup->token(node,node->type)->kind;
+	*m_printer << kind;
+
+	if (kind == Token_class || kind == Token_typename)
+	{
+		visit(node->name);
+		if (node->type_id)
+		{
+			*m_printer << '=';
+			visit(node->type_id);
+		}
+	} 
+	else if (kind == Token_template)
+	{
+		*m_printer << '<';
+		visitListWithSeparator(node->template_parameters,',');
+		*m_printer << '>';
+
+		if (node->name)
+		{
+			visit(node->name);
+			if (node->type_id)
+			{
+				*m_printer << '=';
+				visit(node->type_id);
+			}
+		}
+		if (node->template_name)
+		{
+			*m_printer << '=';
+			visit(node->template_name);
+		}
+	}
 }
 void PrettyPrintVisitor::visitTypedef(TypedefAST* node)
 {
@@ -682,9 +732,11 @@ void PrettyPrintVisitor::visitUsing(UsingAST* node)
 	writeToken(node,node->type_name);
 	*m_printer << ';';
 }
-void PrettyPrintVisitor::visitUsingDirective(UsingDirectiveAST* )
+void PrettyPrintVisitor::visitUsingDirective(UsingDirectiveAST* node)
 {
-	Q_ASSERT(0); // Not implemented yet
+	*m_printer << Token_namespace;
+	visit(node->name);
+	*m_printer << ';';
 }
 void PrettyPrintVisitor::visitWhileStatement(WhileStatementAST* node)
 {
@@ -694,9 +746,10 @@ void PrettyPrintVisitor::visitWhileStatement(WhileStatementAST* node)
 	*m_printer << ')';
 	visit(node->statement);
 }
-void PrettyPrintVisitor::visitWinDeclSpec(WinDeclSpecAST* )
+void PrettyPrintVisitor::visitWinDeclSpec(WinDeclSpecAST* node)
 {
-	Q_ASSERT(0); // Not implemented yet
+	writeToken(node,node->specifier);
+	writeToken(node,node->modifier);
 }
 template <class T>
 void PrettyPrintVisitor::visitListWithSeparator(const ListNode<T>* nodes,int separatorToken,
