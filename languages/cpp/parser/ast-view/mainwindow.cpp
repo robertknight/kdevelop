@@ -24,6 +24,7 @@
 #include "parsesession.h"
 #include "control.h"
 #include "xmlwritervisitor.h"
+#include "prettyprintvisitor.h"
 
 // Local
 #include "dommodel.h"
@@ -87,6 +88,7 @@ void MainWindow::recreateAST()
 
 	if (parse(m_sourceDocument->text().toLocal8Bit(),ast,tokenStream))
 	{
+		// dump AST as XML to output
 		QBuffer buffer;
 		buffer.open(QIODevice::ReadWrite);
 		writer.write(&buffer,ast,tokenStream);
@@ -96,6 +98,19 @@ void MainWindow::recreateAST()
 		m_astModel->setDomNode(xmlDoc);
 
 		updateProblemList();
+
+		// recreate AST with pretty printer
+		TokenStreamTokenLookup tokenLookup(tokenStream);
+		SimplePrinter printer;
+		PrettyPrintVisitor visitor;
+		visitor.setTokenLookup(&tokenLookup);
+		visitor.setPrinter(&printer);
+
+		QFile outFile;
+		outFile.open(stdout,QIODevice::WriteOnly);
+		char newLine = '\n';
+		outFile.write(&newLine,1);
+		visitor.write(&outFile,ast);
 	}
 	m_astView->expandAll();
 }
