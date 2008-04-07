@@ -50,10 +50,18 @@ void SimplePrinter::print(int tokenType, const QString& text)
 		}
 
 	// whitespace based on previous token
-	if (m_lastTokenType == '{' || m_lastTokenType == '}' || m_lastTokenType == ';')
+	if (m_lastTokenType == '{')
+		newLine();
+	else if (m_lastTokenType == '}')
+	{
 		if (tokenType != ';')
 			newLine();
-
+	}
+	else if (m_lastTokenType == ';')
+	{
+		if (tokenType != '}')
+			newLine();
+	}
 	else if (m_lastTokenType == ',')
 	{
 		*m_output << ' ';
@@ -159,16 +167,88 @@ void PrettyPrintVisitor::visitParameterDeclarationClause(ParameterDeclarationCla
 	}
 	*m_printer << ')';
 }
+int PrettyPrintVisitor::opPrecedence(int opKind)
+{
+	static const int precedence[] = 
+		{ 	Token_throw, 
+			Token_assign,
+			Token_or,
+			Token_and,
+			'|',
+			'^',
+			'&',
+			Token_not_eq,
+			Token_eq,
+			Token_geq,
+			Token_leq,
+			'>',
+			'<',
+			Token_shift, // '<<' has precedence over '>>'
+			'-',
+			'+',
+			'%',
+			'/',
+			'*',
+			Token_ptrmem, // '.*' has precedence over '->*'
+			
+			// cast expressions of the form (typeid)cast-expression go here
+			
+			Token_delete,
+			Token_new,
+			Token_sizeof,
+			Token_decr,
+			Token_incr,
+
+			// postfix expressions go here
+			
+			0
+		};
+		
+		for (int i=0;precedence[i] != 0;i++)
+			if (opKind == precedence[i])
+				return i;
+		return -1;
+}
+bool PrettyPrintVisitor::higherPrecedenceInStack(int opKind) const
+{
+	int precedence = opPrecedence(opKind);
+	for (int i = m_opStack.count()-1 ; i >= 0 ; i--)
+		if (opPrecedence(m_opStack[i]) > precedence)
+			return true;
+	return false;
+}
 void PrettyPrintVisitor::visitBinaryExpression(BinaryExpressionAST* node)
 {
+	int opKind = m_tokenLookup->token(node,node->op)->kind;
+	bool addParens = higherPrecedenceInStack(opKind);
+	if (addParens)
+		*m_printer << '(';
+
+	m_opStack.push(opKind);
+
 	visit(node->left_expression);
 	writeToken(node,node->op);
 	visit(node->right_expression);
+
+	m_opStack.pop();
+
+	if (addParens)
+		*m_printer << ')';
 }
 void PrettyPrintVisitor::visitUnaryExpression(UnaryExpressionAST* node)
 {
+	int opKind = m_tokenLookup->token(node,node->op)->kind;
+	bool addParens = higherPrecedenceInStack(opKind);
+	if (addParens)
+		*m_printer << '(';
+	m_opStack.push(opKind);
+
 	writeToken(node,node->op);
 	visit(node->expression);
+
+	m_opStack.pop();
+	if (addParens)
+		*m_printer << ')';
 }
 void PrettyPrintVisitor::visitTypeSpecifier(TypeSpecifierAST* node)
 {

@@ -168,8 +168,12 @@ private:
 	template <class T>
 	void visitListWithSeparator(const ListNode<T>* nodes,int separatorToken,
 								int startToken = 0, int endToken = 0);
-	
+	bool higherPrecedenceInStack(int opKind) const;
+	static int opPrecedence(int opKind);
+
 	QStack<AST*> m_nodeStack;
+	QStack<int> m_opStack;
+
 	TokenLookup* m_tokenLookup;
 	PrettyPrintWriter* m_printer;
 	int m_currentIndentation;
