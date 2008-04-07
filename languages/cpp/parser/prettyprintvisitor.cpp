@@ -18,7 +18,7 @@ const Token* TokenStreamTokenLookup::token(AST*, std::size_t index) const
 
 PrettyPrintWriter& PrettyPrintWriter::operator<<(int tokenType)
 {
-	print(tokenType,token_name(tokenType));		
+	print(tokenType,token_string(tokenType));		
 	return *this;
 }
 PrettyPrintWriter& PrettyPrintWriter::operator<<(const QString& text)
@@ -581,6 +581,7 @@ void PrettyPrintVisitor::visitListWithSeparator(const ListNode<T>* nodes,int sep
 		if (node->hasNext())
 		{
 			*m_printer << separatorToken;
+			node = node->next;
 		}
 		else
 			break;
