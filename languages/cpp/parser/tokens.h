@@ -137,6 +137,15 @@ enum TOKEN_KIND
 
 /**@return human-readable name of the token.*/
 KDEVCPPPARSER_EXPORT char const *token_name(int token);
+/**
+ * @return Literal text associated with a token.
+ * eg. token_string(Token_and) returns "&&"
+ *
+ * Where there is ambiguity, (eg. "and" and "&&" both map
+ * to Token_and), the more commonly used variant ("&&") is 
+ * returned.
+ */
+KDEVCPPPARSER_EXPORT char const *token_string(int token);
 
 #endif
 
