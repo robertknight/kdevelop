@@ -452,7 +452,13 @@ void PrettyPrintVisitor::visitIncrDecrExpression(IncrDecrExpressionAST* node)
 }
 void PrettyPrintVisitor::visitInitDeclarator(InitDeclaratorAST* node)
 {
-	DefaultVisitor::visitInitDeclarator(node);
+	visit(node->declarator);
+
+	if (node->initializer)
+	{
+		*m_printer << '=';
+		visit(node->initializer);
+	}
 }
 void PrettyPrintVisitor::visitInitializer(InitializerAST* node)
 {
@@ -500,17 +506,57 @@ void PrettyPrintVisitor::visitNamespaceAliasDefinition(NamespaceAliasDefinitionA
 {
 	Q_ASSERT(0); // Not implemented yet
 }
-void PrettyPrintVisitor::visitNewDeclarator(NewDeclaratorAST* )
+void PrettyPrintVisitor::visitNewDeclarator(NewDeclaratorAST* node)
 {
-	Q_ASSERT(0); // Not implemented yet
+	visit(node->ptr_op);
+	visit(node->sub_declarator);
+	
+	const ListNode<ExpressionAST*>* expression = node->expressions ? 
+												 node->expressions->toFront() : 0;
+	while (expression)
+	{
+		*m_printer << '[';
+		visit(expression->element);
+		*m_printer << ']';
+		if (expression->hasNext())
+			expression = expression->next;
+		else
+			break;
+	}
 }
-void PrettyPrintVisitor::visitNewExpression(NewExpressionAST* )
+void PrettyPrintVisitor::visitNewExpression(NewExpressionAST* node)
 {
-	Q_ASSERT(0); // Not implemented yet
+	if (node->scope_token)
+		*m_printer << Token_scope;
+	if (node->new_token)
+		*m_printer << Token_new;
+
+	if (node->expression)
+	{
+		*m_printer << '(';
+		visit(node->expression);
+		*m_printer << ')';
+	}
+	
+	if (node->type_id)
+	{
+		*m_printer << '(';
+		visit(node->type_id);
+		*m_printer << ')';
+	}
+	else
+		visit(node->new_type_id);
+
+	if (node->new_initializer)
+	{
+		*m_printer << '(';
+		visit(node->new_initializer);
+		*m_printer << ')';
+	}
 }
-void PrettyPrintVisitor::visitNewInitializer(NewInitializerAST* )
+void PrettyPrintVisitor::visitNewInitializer(NewInitializerAST* node)
 {
-	Q_ASSERT(0); // Not implemented yet
+	visit(node->expression);
 }
 void PrettyPrintVisitor::visitOperator(OperatorAST* node)
 {
