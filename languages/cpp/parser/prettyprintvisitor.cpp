@@ -487,9 +487,12 @@ void PrettyPrintVisitor::visitLinkageSpecification(LinkageSpecificationAST* )
 {
 	Q_ASSERT(0); // Not implemented yet
 }
-void PrettyPrintVisitor::visitMemInitializer(MemInitializerAST* )
+void PrettyPrintVisitor::visitMemInitializer(MemInitializerAST* node)
 {
-	Q_ASSERT(0); // Not implemented yet
+	visit(node->initializer_id);
+	*m_printer << '(';
+	visit(node->expression);
+	*m_printer << ')';
 }
 void PrettyPrintVisitor::visitName(NameAST* node)
 {
