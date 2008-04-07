@@ -257,6 +257,7 @@ void PrettyPrintVisitor::visitTypeSpecifier(TypeSpecifierAST* node)
 void PrettyPrintVisitor::visitAccessSpecifier(AccessSpecifierAST* node)
 {
 	writeTokenList(node,node->specs);
+	*m_printer << ':';
 }
 void PrettyPrintVisitor::visitBaseClause(BaseClauseAST* node)
 {
@@ -301,7 +302,6 @@ void PrettyPrintVisitor::visitClassSpecifier(ClassSpecifierAST* node)
 	*m_printer << '{';
 	visitNodes(this,node->member_specs);
 	*m_printer << '}';
-	*m_printer << ';';
 }
 void PrettyPrintVisitor::visitCppCastExpression(CppCastExpressionAST* node)
 {
@@ -533,7 +533,8 @@ void PrettyPrintVisitor::visitPostfixExpression(PostfixExpressionAST* node)
 }
 void PrettyPrintVisitor::visitPrimaryExpression(PrimaryExpressionAST* node)
 {
-	DefaultVisitor::visitPrimaryExpression(node);	
+	DefaultVisitor::visitPrimaryExpression(node);
+	writeToken(node,node->token);
 }
 void PrettyPrintVisitor::visitPtrOperator(PtrOperatorAST* node)
 {
@@ -558,7 +559,11 @@ void PrettyPrintVisitor::visitReturnStatement(ReturnStatementAST* node)
 }
 void PrettyPrintVisitor::visitSimpleDeclaration(SimpleDeclarationAST* node)
 {
-	DefaultVisitor::visitSimpleDeclaration(node);
+	writeTokenList(node,node->storage_specifiers);
+	writeTokenList(node,node->function_specifiers);
+	visit(node->type_specifier);
+	visitNodes(this,node->init_declarators);
+	visit(node->win_decl_specifiers);
 	*m_printer << ';';
 }
 void PrettyPrintVisitor::visitSizeofExpression(SizeofExpressionAST* )
@@ -676,10 +681,18 @@ void PrettyPrintVisitor::writeToken(AST* node, std::size_t index)
 
 	if (!token)
 		return;
-	else if (token->kind == Token_identifier)
+
+	switch (token->kind)
+	{
+	case Token_identifier:
+	case Token_char_literal:
+	case Token_string_literal:
+	case Token_number_literal:
 		*m_printer << token->symbol();
-	else
+		break;
+	default:		
 		*m_printer << token->kind;
+	}
 }
 void PrettyPrintVisitor::writeTokenList(AST* node,const ListNode<std::size_t>* list) 
 {
