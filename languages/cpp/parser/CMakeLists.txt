@@ -24,6 +24,7 @@ set(kdevcppparser_LIB_SRCS
     tokens.cpp
     dumptree.cpp
     parsesession.cpp
+	prettyprintvisitor.cpp
     type_compiler.cpp
     commentparser.cpp
     commentformatter.cpp
