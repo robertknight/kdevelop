@@ -201,8 +201,20 @@ void PrettyPrintVisitor::visitUnqualifiedName(UnqualifiedNameAST* node)
 }
 void PrettyPrintVisitor::visitExpressionOrDeclarationStatement(ExpressionOrDeclarationStatementAST* node)
 {
-	// ignore ambiguity - treat it as a declaration
-	visit(node->declaration);
+	if (node->typeKnown)
+	{
+		if (node->expressionChosen)
+			visit(node->expression);
+		else 
+			visit(node->declaration);
+	}
+	else
+	{
+		qWarning() << 	"Pretty-printing ambiguous statement which may be an expression"
+						"(a function call) or a declaration (of the form T(initializer))\n"
+						"Treating statement as an expression for now.";
+		visit(node->expression);
+	}
 }
 void PrettyPrintVisitor::visitParameterDeclarationClause(ParameterDeclarationClauseAST* node)
 {
@@ -512,7 +524,6 @@ void PrettyPrintVisitor::visitForStatement(ForStatementAST* node)
 	visit(node->expression);
 	*m_printer << ')';
 	visit(node->statement);
-	*m_printer << ';';
 }
 void PrettyPrintVisitor::visitIfStatement(IfStatementAST* node)
 {
@@ -527,7 +538,6 @@ void PrettyPrintVisitor::visitIfStatement(IfStatementAST* node)
 		*m_printer << Token_else;
 		visit(node->else_statement);
 	}
-	*m_printer << ';';
 }
 void PrettyPrintVisitor::visitIncrDecrExpression(IncrDecrExpressionAST* node)
 {

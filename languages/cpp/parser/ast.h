@@ -452,7 +452,12 @@ struct ExpressionOrDeclarationStatementAST: public StatementAST
   StatementAST *declaration;
 
   // This was not originally part of the AST - added by the context visitor
-  bool expressionChosen;
+  
+  // set to false if this statement is ambiguous or true once type checking
+  // has been used to disambiguate it
+  bool typeKnown:1;
+  // if typeKnown is true, 
+  bool expressionChosen:1;
 };
 
 ///An expression terminated by a semicolon or similar

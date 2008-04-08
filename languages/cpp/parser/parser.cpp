@@ -2821,7 +2821,8 @@ bool Parser::parseExpressionOrDeclarationStatement(StatementAST *&node)
         = CreateNode<ExpressionOrDeclarationStatementAST>(session->mempool);
       ast->declaration = decl_ast;
       ast->expression = expr_ast;
-
+      ast->typeKnown = false;
+      
       UPDATE_POS(ast, start, _M_last_valid_token+1);
       node = ast;
     }
