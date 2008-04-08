@@ -798,6 +798,7 @@ void ContextBuilder::visitExpressionOrDeclarationStatement(ExpressionOrDeclarati
         iv.visit(node->expression);
         //kDebug(9007) << m_editor->findPosition(node->start_token) << "IdentifierVerifier returned" << iv.result;
         node->expressionChosen = iv.result;
+        node->typeKnown = true; // mark ambiguity as resolved
       }
 
       if (node->expressionChosen)
