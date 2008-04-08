@@ -1,3 +1,21 @@
+/* This file is part of KDevelop
+    Copyright 2008 Robert Knight <robertknight@gmail.com>
+
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Library General Public
+   License version 2 as published by the Free Software Foundation
+   or, at your option, any later version.
+
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Library General Public License for more details.
+
+   You should have received a copy of the GNU Library General Public License
+   along with this library; see the file COPYING.LIB.  If not, write to
+   the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+   Boston, MA 02110-1301, USA.
+*/
 
 #include "tokens.h"
 #include "prettyprintvisitor.h"
@@ -30,14 +48,38 @@ void SimplePrinter::reset(QTextStream* output)
 {
 	m_output = output;
 	m_lastWasAlphaNum = false;
+	m_inTemplate = false;
 	m_lastTokenType = 0;
 	m_indentation = 0;
 }
-void SimplePrinter::enter(AST*)
+void SimplePrinter::enter(AST* node)
 {
+	switch (node->kind)
+	{
+		case AST::Kind_TemplateDeclaration:
+			m_inTemplate = true;
+			break;
+		case AST::Kind_SimpleDeclaration:
+		case AST::Kind_FunctionDefinition:
+			if (m_inTemplate)
+				newLine();
+			break;
+		case AST::Kind_CtorInitializer:
+			newLine();
+			break;
+	};
 }
-void SimplePrinter::leave(AST*)
+void SimplePrinter::leave(AST* node)
 {
+	switch (node->kind)
+	{
+		case AST::Kind_AccessSpecifier:
+			newLine();
+			break;
+		case AST::Kind_TemplateDeclaration:
+			m_inTemplate = false;
+			break;
+	};
 }
 void SimplePrinter::print(int tokenType, const QString& text)
 {
@@ -108,6 +150,8 @@ void PrettyPrintVisitor::write(QIODevice* device, AST* node)
 }
 void PrettyPrintVisitor::visit(AST* node)
 {
+	if (!node)
+		return;
 	m_nodeStack.push(node);
 	m_printer->enter(node);
 	DefaultVisitor::visit(node);

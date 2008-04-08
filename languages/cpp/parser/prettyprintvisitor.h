@@ -72,6 +72,7 @@ private:
 	int m_lastTokenType;
 	int m_indentation;
 	bool m_lastWasAlphaNum:1;
+	bool m_inTemplate:1;
 };
 
 class KDEVCPPPARSER_EXPORT PrettyPrintVisitor : protected DefaultVisitor
