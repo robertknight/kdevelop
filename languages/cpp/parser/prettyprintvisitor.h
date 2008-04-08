@@ -68,11 +68,14 @@ public:
 private:
 	void newLine();
 
+	QString m_currentLine;
+	QTextStream m_lineOutput;
 	QTextStream* m_output;
 	int m_lastTokenType;
 	int m_indentation;
 	bool m_lastWasAlphaNum:1;
 	bool m_inTemplate:1;
+	AST* m_topNode;
 };
 
 class KDEVCPPPARSER_EXPORT PrettyPrintVisitor : protected DefaultVisitor
@@ -98,6 +101,7 @@ protected:
 	virtual void visitClassMemberAccess(ClassMemberAccessAST *);
 	virtual void visitClassSpecifier(ClassSpecifierAST *);
 	virtual void visitCompoundStatement(CompoundStatementAST *);
+	virtual void visitCondition(ConditionAST *);
 	virtual void visitCppCastExpression(CppCastExpressionAST *);
 	virtual void visitCtorInitializer(CtorInitializerAST *);
 	virtual void visitDeclarationStatement(DeclarationStatementAST *);

@@ -51,9 +51,15 @@ void SimplePrinter::reset(QTextStream* output)
 	m_inTemplate = false;
 	m_lastTokenType = 0;
 	m_indentation = 0;
+	m_currentLine.clear();
+	m_lineOutput.setString(&m_currentLine);
+	m_topNode = 0;
 }
 void SimplePrinter::enter(AST* node)
 {
+	if (!m_topNode)
+		m_topNode = node;
+
 	switch (node->kind)
 	{
 		case AST::Kind_TemplateDeclaration:
@@ -67,6 +73,10 @@ void SimplePrinter::enter(AST* node)
 		case AST::Kind_CtorInitializer:
 			newLine();
 			break;
+		case AST::Kind_AccessSpecifier:
+			if (m_lastTokenType != '{')
+				m_indentation--;
+			break;
 	};
 }
 void SimplePrinter::leave(AST* node)
@@ -75,11 +85,15 @@ void SimplePrinter::leave(AST* node)
 	{
 		case AST::Kind_AccessSpecifier:
 			newLine();
+			m_indentation++;
 			break;
 		case AST::Kind_TemplateDeclaration:
 			m_inTemplate = false;
 			break;
 	};
+
+	if (node == m_topNode)
+		newLine();
 }
 void SimplePrinter::print(int tokenType, const QString& text)
 {
@@ -93,7 +107,10 @@ void SimplePrinter::print(int tokenType, const QString& text)
 
 	// whitespace based on previous token
 	if (m_lastTokenType == '{')
+	{
 		newLine();
+		m_indentation++;
+	}
 	else if (m_lastTokenType == '}')
 	{
 		if (tokenType != ';')
@@ -106,34 +123,39 @@ void SimplePrinter::print(int tokenType, const QString& text)
 	}
 	else if (m_lastTokenType == ',')
 	{
-		*m_output << ' ';
+		m_lineOutput << ' ';
 	}
 
+	bool 	requiresSpace = alphaNum && m_lastWasAlphaNum;
+			requiresSpace = requiresSpace || (m_lastTokenType == '>' && tokenType == '>');
+			requiresSpace = requiresSpace || (m_lastTokenType == '>' && tokenType == '=');
+
+
 	// whitespace based on current token 
-	if (alphaNum && m_lastWasAlphaNum)
-		*m_output << ' ';
+	if (requiresSpace)
+		m_lineOutput << ' ';
 	else if (tokenType == '{')
 	{
 		newLine();
-		m_indentation++;
 	}
 	else if (tokenType == '}')
 	{
-		m_indentation--;
 		newLine();
+		m_indentation--;
 	}
 
-	*m_output << text;
+	m_lineOutput << text;
 
 	m_lastWasAlphaNum = alphaNum;
 	m_lastTokenType = tokenType;
 }
 void SimplePrinter::newLine()
 {
-	Q_ASSERT(m_indentation >= 0);
-
+	if (m_indentation > 0)
+		*m_output << QString(m_indentation,'\t');
+	*m_output << m_currentLine;
+	m_currentLine.clear();
 	*m_output << '\n';
-	*m_output << QString(m_indentation,'\t');
 }
 
 PrettyPrintVisitor::PrettyPrintVisitor()
@@ -166,6 +188,7 @@ void PrettyPrintVisitor::visitCompoundStatement(CompoundStatementAST* node)
 }
 void PrettyPrintVisitor::visitSimpleTypeSpecifier(SimpleTypeSpecifierAST* node)
 {
+	visitTypeSpecifier(node);
 	writeTokenList(node,node->integrals);
 	DefaultVisitor::visitSimpleTypeSpecifier(node);
 }
@@ -324,6 +347,10 @@ void PrettyPrintVisitor::visitCastExpression(CastExpressionAST* node)
 	visit(node->expression);
 	*m_printer << ')';
 }
+void PrettyPrintVisitor::visitCondition(ConditionAST* node)
+{
+	visit(node->expression);
+}
 void PrettyPrintVisitor::visitHandler(HandlerAST* node)
 {
 	*m_printer << Token_catch;
@@ -339,6 +366,7 @@ void PrettyPrintVisitor::visitClassMemberAccess(ClassMemberAccessAST* node)
 }
 void PrettyPrintVisitor::visitClassSpecifier(ClassSpecifierAST* node)
 {
+	visitTypeSpecifier(node);
 	visit(node->win_decl_specifiers);
 	writeToken(node,node->class_key);
 	visit(node->name);
@@ -400,11 +428,13 @@ void PrettyPrintVisitor::visitDoStatement(DoStatementAST* node)
 }
 void PrettyPrintVisitor::visitElaboratedTypeSpecifier(ElaboratedTypeSpecifierAST* node)
 {
+	visitTypeSpecifier(node);
 	writeToken(node,node->type);
 	visit(node->name);
 }
 void PrettyPrintVisitor::visitEnumSpecifier(EnumSpecifierAST* node)
 {
+	visitTypeSpecifier(node);
 	*m_printer << Token_enum;
 	visit(node->name);
 	*m_printer << '{';
@@ -456,18 +486,27 @@ void PrettyPrintVisitor::visitFunctionDefinition(FunctionDefinitionAST* node)
 {
 	writeTokenList(node,node->storage_specifiers);
 	writeTokenList(node,node->function_specifiers);
-	DefaultVisitor::visitFunctionDefinition(node);
+
+	visit(node->type_specifier);
+	visit(node->init_declarator);
+	
+	if (node->function_body->kind == AST::Kind_FunctionTryBlock)
+		*m_printer << Token_try;
+
+	visit(node->constructor_initializers);
+	visit(node->function_body);
+	visit(node->win_decl_specifiers);
 }
-void PrettyPrintVisitor::visitFunctionTryBlock(FunctionTryBlockAST* )
+void PrettyPrintVisitor::visitFunctionTryBlock(FunctionTryBlockAST* node)
 {
-	Q_ASSERT(0); // Not implemented yet
+	visit(node->body);
+	visitNodes(this,node->handlers);
 }
 void PrettyPrintVisitor::visitForStatement(ForStatementAST* node)
 {
 	*m_printer << Token_for;
 	*m_printer << '(';
 	visit(node->init_statement);
-	*m_printer << ';';
 	visit(node->condition);
 	*m_printer << ';';
 	visit(node->expression);
@@ -611,14 +650,17 @@ void PrettyPrintVisitor::visitNewInitializer(NewInitializerAST* node)
 }
 void PrettyPrintVisitor::visitOperator(OperatorAST* node)
 {
-	*m_printer << Token_operator;
-	writeToken(node,node->op);
 	writeToken(node,node->open);
+	if (node->open != node->op)
+		writeToken(node,node->op);
 	writeToken(node,node->close);
 }
-void PrettyPrintVisitor::visitOperatorFunctionId(OperatorFunctionIdAST* )
+void PrettyPrintVisitor::visitOperatorFunctionId(OperatorFunctionIdAST* node)
 {
-	Q_ASSERT(0); // Not implemented yet
+	*m_printer << Token_operator;
+	visit(node->op);
+	visit(node->type_specifier);
+	visitNodes(this,node->ptr_ops);
 }
 void PrettyPrintVisitor::visitParameterDeclaration(ParameterDeclarationAST* node)
 {
@@ -698,8 +740,6 @@ void PrettyPrintVisitor::visitTemplateArgument(TemplateArgumentAST* node)
 	visit(node->type_id);
 	visit(node->expression);
 	*m_printer << '>';
-	*m_printer << ' '; 	// force space so that closing nested template arrows
-						// are not treated as a right-shift ('>>') operator
 }
 void PrettyPrintVisitor::visitTemplateDeclaration(TemplateDeclarationAST* node)
 {
@@ -751,7 +791,6 @@ void PrettyPrintVisitor::visitTypeParameter(TypeParameterAST* node)
 		*m_printer << '<';
 		visitListWithSeparator(node->template_parameters,',');
 		*m_printer << '>';
-		*m_printer << ' '; // force space, otherwise the parser interprets '>=' as Token_geq
 		if (node->name)
 		{
 			visit(node->name);
@@ -839,6 +878,7 @@ void PrettyPrintVisitor::writeToken(AST* node, std::size_t index)
 	case Token_char_literal:
 	case Token_string_literal:
 	case Token_number_literal:
+	case Token_shift:
 		*m_printer << token->symbol();
 		break;
 	default:		
