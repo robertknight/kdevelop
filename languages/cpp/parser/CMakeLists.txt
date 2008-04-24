@@ -13,6 +13,7 @@ add_subdirectory(ast-view)
 set(kdevcppparser_LIB_SRCS
     ast.cpp
     default_visitor.cpp
+	mergedvisitor.cpp
     memorypool.cpp
     name_compiler.cpp
     visitor.cpp
