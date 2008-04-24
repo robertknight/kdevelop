@@ -20,7 +20,7 @@
 #ifndef XMLWRITERVISITOR
 #define XMLWRITERVISITOR 
 
-#include "default_visitor.h"
+#include "mergedvisitor.h"
 #include <cppparserexport.h>
 
 class QXmlStreamWriter;
@@ -34,7 +34,7 @@ class TokenStream;
  * Each type of AST node maps to one type of XML element.  The XML element
  * name for a type is taken from the AST::kindNames array.
  */
-class KDEVCPPPARSER_EXPORT XmlWriterVisitor : protected DefaultVisitor
+class KDEVCPPPARSER_EXPORT XmlWriterVisitor : public MergedVisitor
 {
 public:
 	XmlWriterVisitor();
@@ -67,7 +67,7 @@ protected:
 	virtual void visitExceptionSpecification(ExceptionSpecificationAST*);
 	virtual void visitFunctionDefinition(FunctionDefinitionAST*);
 	virtual void visitIncrDecrExpression(IncrDecrExpressionAST*);
-  virtual void visitJumpStatement(JumpStatementAST*);
+  	virtual void visitJumpStatement(JumpStatementAST*);
 	virtual void visitLinkageSpecification(LinkageSpecificationAST*);
 	virtual void visitName(NameAST*);
 	virtual void visitNamespace(NamespaceAST*);
