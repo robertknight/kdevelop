@@ -175,7 +175,8 @@ void MainWindow::recreateAST()
 		outFile.open(stdout,QIODevice::WriteOnly);
 		char newLine = '\n';
 		outFile.write(&newLine,1);
-		visitor.write(&outFile,ast);
+        visitor.setDevice(&outFile);
+		visitor.write(ast);
 	}
 	m_astView->expandAll();
 }

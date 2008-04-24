@@ -67,7 +67,10 @@ public:
 	void setPrinter(PrettyPrintWriter* rules);	
 	PrettyPrintWriter* printer() const;
 
-	void write(QIODevice* device, AST* node);
+    void setDevice(QIODevice* device);
+    QIODevice* device() const;
+
+	void write(AST* node);
 
 protected:
 	virtual void visit(AST* node);

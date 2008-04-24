@@ -161,12 +161,19 @@ void SimplePrinter::newLine()
 PrettyPrintVisitor::PrettyPrintVisitor()
 : m_printer(0) , m_currentIndentation(0)
 {}
-void PrettyPrintVisitor::write(QIODevice* device, AST* node)
+void PrettyPrintVisitor::setDevice(QIODevice* device)
+{
+    m_outputStream.setDevice(device);
+}
+QIODevice* PrettyPrintVisitor::device() const
+{
+    return m_outputStream.device();
+}
+void PrettyPrintVisitor::write(AST* node)
 {
 	Q_ASSERT(tokenLookup());
 	Q_ASSERT(printer());
 
-	m_outputStream.setDevice(device);
 	m_printer->reset(&m_outputStream);
 	visit(node);
 }
