@@ -13,7 +13,10 @@ public:
 	virtual ~TokenLookup() {}
 
 	virtual const Token* token(AST* node, std::size_t index) const = 0; 
-	QString tokenString(AST* node, std::size_t index) const;
+	virtual QString tokenString(AST* node, std::size_t index) const;
+
+    virtual bool hasOriginalContent(AST* node) const = 0;
+    virtual QByteArray originalContent(AST* node) const = 0;
 };
 
 class KDEVCPPPARSER_EXPORT TokenStreamTokenLookup : public TokenLookup
@@ -21,8 +24,29 @@ class KDEVCPPPARSER_EXPORT TokenStreamTokenLookup : public TokenLookup
 public:
 	TokenStreamTokenLookup(TokenStream* stream);
 	virtual const Token* token(AST* node, std::size_t index) const;
-private:
+
+    virtual bool hasOriginalContent(AST* node) const;
+    virtual QByteArray originalContent(AST* node) const;
+
+protected:
 	TokenStream* m_tokens;
+};
+
+class KDEVCPPPARSER_EXPORT MergedTokenLookup : public TokenStreamTokenLookup
+{
+public:
+    MergedTokenLookup(TokenStream* sourceStream);
+    int createNewToken(int kind, const QString& text);
+
+    // reimplemented
+    virtual const Token* token(AST* node, std::size_t index) const;
+    virtual QString tokenString(AST* node, std::size_t index) const;
+    virtual bool hasOriginalContent(AST* node) const;
+
+private:
+    QHash<int,Token> m_newTokens;
+    int m_newTokenIndex;
+    QString m_contentBuffer;
 };
 
 class KDEVCPPPARSER_EXPORT NodeLookup
@@ -30,7 +54,7 @@ class KDEVCPPPARSER_EXPORT NodeLookup
 public:
 	virtual ~NodeLookup() {}
 
-	class Node
+	class KDEVCPPPARSER_EXPORT Node
 	{
 	public:
 		enum Type
@@ -52,9 +76,15 @@ public:
 	};
 
 	virtual Node lookup(AST* node) const;
+    
+    void setReplacement(AST* node, Node replacement);
+    QHash<AST*,Node> replacements() const;
+
+    void setChildrenChanged(AST* node, bool changed);
 
 private:
 	QHash<AST*,Node> m_replacements;
+    QSet<AST*> m_childrenChangedSet;
 };
 
 inline NodeLookup::Node::Type NodeLookup::Node::type() const
@@ -65,6 +95,8 @@ inline AST* NodeLookup::Node::ast() const
 class KDEVCPPPARSER_EXPORT MergedVisitor : public DefaultVisitor
 {
 public:
+    MergedVisitor();
+
 	void setNodeLookup(NodeLookup* lookup) 
 	{ m_nodeLookup = lookup; }
 
