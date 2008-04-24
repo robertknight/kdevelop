@@ -31,6 +31,9 @@
 #include "prettyprintvisitor.h"
 #include "xmlwritervisitor.h"
 
+#include "transform/astmerger.h"
+#include "transform/astmanipulator.h"
+
 // Local
 #include "dommodel.h"
 
@@ -147,16 +150,21 @@ void MainWindow::applyTransform()
 void MainWindow::recreateAST()
 {
 	m_control = Control();
-	XmlWriterVisitor writer;
+	
+    XmlWriterVisitor writer;
 	TranslationUnitAST* ast;
 	TokenStream* tokenStream;
 
 	if (parse(m_sourceDocument->text().toLocal8Bit(),ast,tokenStream))
 	{
 		// dump AST as XML to output
-		QBuffer buffer;
+        TokenStreamTokenLookup plainTokenLookup(tokenStream);
+		NodeLookup nodeLookup;
+        writer.setTokenLookup(&plainTokenLookup);
+		writer.setNodeLookup(&nodeLookup);
+        QBuffer buffer;
 		buffer.open(QIODevice::ReadWrite);
-		writer.write(&buffer,ast,tokenStream);
+		writer.write(&buffer,ast);
 		QDomDocument xmlDoc;
 		xmlDoc.setContent(buffer.data());
 		
@@ -165,20 +173,40 @@ void MainWindow::recreateAST()
 		updateProblemList();
 
 		// recreate AST with pretty printer
-		TokenStreamTokenLookup tokenLookup(tokenStream);
+		MergedTokenLookup tokenLookup(tokenStream);
 		SimplePrinter printer;
-		PrettyPrintVisitor visitor;
-		visitor.setTokenLookup(&tokenLookup);
-		visitor.setPrinter(&printer);
+        
+        RenameManipulator manipulator;
+        manipulator.setTokenLookup(&tokenLookup);
+        manipulator.setName("foo");
+        manipulator.setNewName("bar");
+        ASTChanges changes = manipulator.createChanges(ast);
+        changes.addToLookup(nodeLookup);
 
+        XmlWriterVisitor transformWriter;
+        transformWriter.setTokenLookup(&tokenLookup);
+        transformWriter.setNodeLookup(&nodeLookup);
+        QBuffer trBuffer;
+        trBuffer.open(QIODevice::ReadWrite);
+        transformWriter.write(&trBuffer,ast);
+        
+        QDomDocument trXmlDoc;
+        trXmlDoc.setContent(trBuffer.data());
+        m_transformedAstModel->setDomNode(trXmlDoc);
+
+        TransformedSourcePrinter visitor;
+		visitor.setTokenLookup(&tokenLookup);
+        visitor.setNodeLookup(&nodeLookup);
+		visitor.setPrinter(&printer);
 		QFile outFile;
 		outFile.open(stdout,QIODevice::WriteOnly);
 		char newLine = '\n';
 		outFile.write(&newLine,1);
         visitor.setDevice(&outFile);
-		visitor.write(ast);
+		visitor.visit(ast);
 	}
 	m_astView->expandAll();
+    m_transformedAstView->expandAll();
 }
 void MainWindow::updateProblemList()
 {
