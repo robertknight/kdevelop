@@ -47,6 +47,17 @@ public:
 	 */
 	void write(QIODevice* device, AST* node);
 
+    enum Feature
+    {
+        PositionFeature = 0x1
+    };
+    Q_DECLARE_FLAGS(Features,Feature);
+
+    void setFeatures(Features features)
+    { m_features = features; }
+    Features features() const
+    { return m_features; }
+
 protected:
 	virtual void visit(AST* node);
 	virtual void visitAccessSpecifier(AccessSpecifierAST*);
@@ -100,9 +111,12 @@ private:
 	// current XML stream, only valid during a call to write()
 	QXmlStreamWriter* m_streamWriter;
 
+    Features m_features;
+
 	static const char* TRUE_STR;
 	static const char* FALSE_STR;
 };
+Q_DECLARE_OPERATORS_FOR_FLAGS(XmlWriterVisitor::Features);
 
 #endif // XMLWRITERVISITOR 
 

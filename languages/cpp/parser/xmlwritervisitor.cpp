@@ -55,6 +55,15 @@ void XmlWriterVisitor::visit(AST* node)
 	if (node)
 	{
 		m_streamWriter->writeStartElement(AST::kindNames[node->kind]);
+
+        if (m_features & PositionFeature) 
+        {
+            const Token* startToken = tokenLookup()->token(node,node->start_token);
+            const Token* endToken = tokenLookup()->token(node,node->end_token);
+            m_streamWriter->writeAttribute("start",QString::number(startToken->position));
+            m_streamWriter->writeAttribute("end",QString::number(endToken->position+endToken->size));
+        }
+
 		MergedVisitor::visit(node);
 		m_streamWriter->writeEndElement();
 	}

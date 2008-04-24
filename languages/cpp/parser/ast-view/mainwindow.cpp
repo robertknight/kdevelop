@@ -152,6 +152,7 @@ void MainWindow::recreateAST()
 	m_control = Control();
 	
     XmlWriterVisitor writer;
+    writer.setFeatures(XmlWriterVisitor::PositionFeature);
 	TranslationUnitAST* ast;
 	TokenStream* tokenStream;
 
@@ -184,6 +185,7 @@ void MainWindow::recreateAST()
         changes.addToLookup(nodeLookup);
 
         XmlWriterVisitor transformWriter;
+        transformWriter.setFeatures(XmlWriterVisitor::PositionFeature);
         transformWriter.setTokenLookup(&tokenLookup);
         transformWriter.setNodeLookup(&nodeLookup);
         QBuffer trBuffer;
