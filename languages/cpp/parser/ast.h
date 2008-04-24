@@ -191,9 +191,9 @@ struct AST
       Kind_UsingDirective,                      // 71
       Kind_WhileStatement,                      // 72
       Kind_WinDeclSpec,                         // 73
-      Kind_Comment,															// 74
-	  	Kind_Handler,															// 75
-			Kind_ExceptionDeclaration,								// 76
+      Kind_Comment,								// 74
+	  Kind_Handler,							    // 75
+	  Kind_ExceptionDeclaration,				// 76
       Kind_FunctionTryBlock,                    // 77
       Kind_JumpStatement,                       // 78
       NODE_KIND_COUNT
