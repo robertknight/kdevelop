@@ -23,26 +23,7 @@
 #include <QtCore/QTextStream>
 #include <QtCore/QStack>
 
-#include "default_visitor.h"
-#include "lexer.h"
-#include "ast.h"
-
-class KDEVCPPPARSER_EXPORT TokenLookup
-{
-public:
-	virtual ~TokenLookup() {}
-
-	virtual const Token* token(AST* node, std::size_t index) const = 0; 
-	QString tokenString(AST* node, std::size_t index) const;
-};
-class KDEVCPPPARSER_EXPORT TokenStreamTokenLookup : public TokenLookup
-{
-public:
-	TokenStreamTokenLookup(TokenStream* stream);
-	virtual const Token* token(AST* node, std::size_t index) const;
-private:
-	TokenStream* m_tokens;
-};
+#include "mergedvisitor.h"
 
 class KDEVCPPPARSER_EXPORT PrettyPrintWriter 
 {
@@ -78,13 +59,10 @@ private:
 	AST* m_topNode;
 };
 
-class KDEVCPPPARSER_EXPORT PrettyPrintVisitor : protected DefaultVisitor
+class KDEVCPPPARSER_EXPORT PrettyPrintVisitor : public MergedVisitor
 {
 public:
 	PrettyPrintVisitor();
-
-	void setTokenLookup(TokenLookup* lookup);
-	TokenLookup* tokenLookup() const;
 
 	void setPrinter(PrettyPrintWriter* rules);	
 	PrettyPrintWriter* printer() const;
@@ -179,17 +157,12 @@ private:
 	QStack<AST*> m_nodeStack;
 	QStack<int> m_opStack;
 
-	TokenLookup* m_tokenLookup;
 	PrettyPrintWriter* m_printer;
 	int m_currentIndentation;
 	QTextStream m_outputStream;
 };
-inline void PrettyPrintVisitor::setTokenLookup(TokenLookup* lookup)
-{ m_tokenLookup = lookup; }
 inline void PrettyPrintVisitor::setPrinter(PrettyPrintWriter* rules)
 { m_printer = rules; }
-inline TokenLookup* PrettyPrintVisitor::tokenLookup() const
-{ return m_tokenLookup; }
 inline PrettyPrintWriter* PrettyPrintVisitor::printer() const
 { return m_printer; }
 

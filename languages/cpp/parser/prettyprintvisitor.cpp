@@ -159,7 +159,7 @@ void SimplePrinter::newLine()
 }
 
 PrettyPrintVisitor::PrettyPrintVisitor()
-: m_tokenLookup(0), m_printer(0) , m_currentIndentation(0)
+: m_printer(0) , m_currentIndentation(0)
 {}
 void PrettyPrintVisitor::write(QIODevice* device, AST* node)
 {
