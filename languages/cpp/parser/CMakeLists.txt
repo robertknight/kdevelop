@@ -10,6 +10,12 @@ add_subdirectory(ast-view)
 
 ########### next target ###############
 
+# Temporarily build the transform classes as part of the parser
+set(kdevcpp_transform_SRCS
+    transform/astmerger.cpp
+    transform/astmanipulator.cpp
+    )
+
 set(kdevcppparser_LIB_SRCS
     ast.cpp
     default_visitor.cpp
@@ -30,6 +36,7 @@ set(kdevcppparser_LIB_SRCS
     commentparser.cpp
     commentformatter.cpp
 	xmlwritervisitor.cpp
+    ${kdevcpp_transform_SRCS}
 )
 
 # Note: This library doesn't follow API/ABI/BC rules and shouldn't have a SOVERSION
