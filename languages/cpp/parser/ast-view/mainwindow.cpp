@@ -5,12 +5,17 @@
 // Qt
 #include <QBuffer>
 #include <QDockWidget>
-#include <QListWidget>
-#include <QTreeView>
-#include <QHBoxLayout>
-#include <QtDebug>
 #include <QFile>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QSplitter>
 #include <QTimer>
+#include <QTreeView>
+#include <QVBoxLayout>
+#include <QtDebug>
+#include <QPushButton>
 
 // KDE
 #include <ktexteditor/view.h>
@@ -20,11 +25,11 @@
 
 // KDevelop
 #include "ast.h"
+#include "control.h"
 #include "parser.h"
 #include "parsesession.h"
-#include "control.h"
-#include "xmlwritervisitor.h"
 #include "prettyprintvisitor.h"
+#include "xmlwritervisitor.h"
 
 // Local
 #include "dommodel.h"
@@ -35,18 +40,16 @@ using namespace KDevelop;
 MainWindow::MainWindow()
 	: m_lastParseSession(0)
 {
-	QWidget* centralWidget = new QWidget;
+	QSplitter* centralWidget = new QSplitter;
 	setCentralWidget(centralWidget);
 	setWindowTitle("AST Viewer");
 
-	QHBoxLayout* layout = new QHBoxLayout(centralWidget);
-
-	createSourceView();
-	createASTView();
+	QWidget* sourceWidget = createSourceView();
+	QWidget* astViews = createASTViews();
 	createProblemView();
 	
-	layout->addWidget(m_sourceView);
-	layout->addWidget(m_astView);
+	centralWidget->addWidget(sourceWidget);
+	centralWidget->addWidget(astViews);
 }
 void MainWindow::createProblemView()
 {
@@ -55,7 +58,7 @@ void MainWindow::createProblemView()
 	problemDock->setWidget(m_parseProblemView);
 	addDockWidget(Qt::BottomDockWidgetArea,problemDock);
 }
-void MainWindow::createSourceView()
+QWidget* MainWindow::createSourceView()
 {
 	// timer to trigger AST view updates when source changes
 	m_parseTimer = new QTimer();
@@ -72,13 +75,75 @@ void MainWindow::createSourceView()
 		SLOT(start()));
 	m_sourceView = m_sourceDocument->createView(this);
 	m_sourceView->setMinimumWidth(400);
+
+	return m_sourceView;
 }
-void MainWindow::createASTView()
+QWidget* MainWindow::createASTViews()
 {
+	QSplitter* astSplitter = new QSplitter(Qt::Vertical);
+	
+	QWidget* originalAst= new QWidget;
 	m_astModel = new DomModel(this);
-	m_astView = new QTreeView(this);
+	QWidget* astLabel = new QLabel("Original AST",originalAst);
+	m_astView = new QTreeView(originalAst);
 	m_astView->setModel(m_astModel);
+	
+	QVBoxLayout* originalAstLayout = new QVBoxLayout(originalAst);
+	originalAstLayout->addWidget(astLabel);
+	originalAstLayout->addWidget(m_astView);
+
+	QWidget* transformedAst = new QWidget;
+	m_transformedAstModel = new DomModel(this);
+	QWidget* transformLabel = new QLabel("Transformed AST",transformedAst);
+	m_transformedAstView = new QTreeView(transformedAst);
+	m_transformedAstView->setModel(m_transformedAstModel);
+	QLabel* transformEditLabel = new QLabel("Transform:");
+	m_transformEdit = new QLineEdit();
+	QPushButton* transformApply = new QPushButton("Apply");
+	QVBoxLayout* transformedAstLayout = new QVBoxLayout(transformedAst);
+	transformedAstLayout->addWidget(transformLabel);
+	transformedAstLayout->addWidget(m_transformedAstView);
+	QHBoxLayout* transformEditLayout = new QHBoxLayout();
+	transformedAstLayout->addLayout(transformEditLayout);
+	transformEditLayout->addWidget(transformEditLabel);
+	transformEditLayout->addWidget(m_transformEdit);
+	transformEditLayout->addWidget(transformApply);
+
+	astSplitter->addWidget(originalAst);
+	astSplitter->addWidget(transformedAst);
+
+	return astSplitter;
 }
+void MainWindow::applyTransform()
+{
+}
+#if 0
+void MainWindow::applyTransform()
+{
+	TransformScriptParser transformParser;
+	XmlWriterVisitor writer;
+
+	AST* rootAst = 0;
+
+	ASTManipulator* manipulator = transformParser.createManipulator(m_transformEdit->text());
+	if (manipulator)
+	{
+		ASTChanges changes = manipulator->createChanges(node);
+		NodeLookup nodeLookup(rootAst);
+		nodeLookup.addChanges(changes);
+
+		TransformedSourcePrinter printer;
+		printer.setNodeLookup(&nodeLookup);
+		printer.
+		
+
+		// dump transformed AST as XML
+		QBuffer buffer;
+		buffer.open(QIODevice::ReadWrite);
+		writer.write(&buffer,ast,tokenStream);
+	}
+}
+#endif
 void MainWindow::recreateAST()
 {
 	m_control = Control();

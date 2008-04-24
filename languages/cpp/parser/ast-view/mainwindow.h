@@ -8,7 +8,7 @@
 class QTreeView;
 class QTimer;
 class QListWidget;
-
+class QLineEdit;
 class ParseSession;
 class TranslationUnitAST;
 class TokenStream;
@@ -33,11 +33,12 @@ public:
 
 private slots:
 	void recreateAST();	
+	void applyTransform();
 
 private:
-	void createSourceView();
+	QWidget* createSourceView();
 	void createProblemView();
-	void createASTView();
+	QWidget* createASTViews();
 	void updateProblemList();
 	bool parse(const QByteArray& source, TranslationUnitAST*& ast, TokenStream*& tokenStream);
 
@@ -47,9 +48,13 @@ private:
 	KTextEditor::Document* m_sourceDocument;
 	KTextEditor::View* m_sourceView;
 	QTreeView* m_astView;
+	QTreeView* m_transformedAstView;
 	QListWidget* m_parseProblemView;
 	DomModel* m_astModel;
+	DomModel* m_transformedAstModel;
+	QLineEdit* m_transformEdit;
 	QTimer* m_parseTimer;
+	
 };
 
 };
