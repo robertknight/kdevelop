@@ -20,20 +20,6 @@
 #include "tokens.h"
 #include "prettyprintvisitor.h"
 
-QString TokenLookup::tokenString(AST* node, std::size_t index) const
-{
-	return token(node,index)->symbol();
-}
-
-TokenStreamTokenLookup::TokenStreamTokenLookup(TokenStream* stream)
-: m_tokens(stream)
-{}
-
-const Token* TokenStreamTokenLookup::token(AST*, std::size_t index) const
-{
-	return &m_tokens->token(index); 
-}
-
 PrettyPrintWriter& PrettyPrintWriter::operator<<(int tokenType)
 {
 	print(tokenType,token_string(tokenType));		
@@ -164,6 +150,7 @@ PrettyPrintVisitor::PrettyPrintVisitor()
 void PrettyPrintVisitor::setDevice(QIODevice* device)
 {
     m_outputStream.setDevice(device);
+	m_printer->reset(&m_outputStream);
 }
 QIODevice* PrettyPrintVisitor::device() const
 {
@@ -174,7 +161,6 @@ void PrettyPrintVisitor::write(AST* node)
 	Q_ASSERT(tokenLookup());
 	Q_ASSERT(printer());
 
-	m_printer->reset(&m_outputStream);
 	visit(node);
 }
 void PrettyPrintVisitor::visit(AST* node)
@@ -896,7 +882,7 @@ void PrettyPrintVisitor::writeToken(AST* node, std::size_t index)
 	case Token_string_literal:
 	case Token_number_literal:
 	case Token_shift:
-		*m_printer << token->symbol();
+		*m_printer << m_tokenLookup->tokenString(node,index);
 		break;
 	default:		
 		*m_printer << token->kind;

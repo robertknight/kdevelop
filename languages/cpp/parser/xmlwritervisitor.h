@@ -43,12 +43,9 @@ public:
 	 * Writes out the contents of an AST as a XML document.
 	 *
 	 * @param device The device to write out the XML document to
-	 * @param node The node of the AST which  
-	 * @param tokenStream The token stream associated with @p node.  This 
-	 * is used to obtain the values for attributes (eg. the type of operator 
-	 * in a binary expression or name of a type specifier)
+	 * @param node The root node of the AST to dump 
 	 */
-	void write(QIODevice* device, AST* node, TokenStream* tokenStream);
+	void write(QIODevice* device, AST* node);
 
 protected:
 	virtual void visit(AST* node);
@@ -94,16 +91,14 @@ private:
 	void visitTypeSpecifier(TypeSpecifierAST*);
 
 	// returns the text of a token in m_tokenStream 
-	QString tokenString(std::size_t token) const;
+	QString tokenString(AST* node,std::size_t token) const;
 	// returns the text of a list of tokens in m_tokenStream
 	// 'list' may be the back of a list, ListNode::toFront() is called
 	// on list before converting each node to a string with tokenString()
-	QString tokenListString(const ListNode<std::size_t>* list) const;
+	QString tokenListString(AST* node,const ListNode<std::size_t>* list) const;
 
 	// current XML stream, only valid during a call to write()
 	QXmlStreamWriter* m_streamWriter;
-	// current token stream, only valid during a call to write()
-	TokenStream* m_tokenStream;
 
 	static const char* TRUE_STR;
 	static const char* FALSE_STR;

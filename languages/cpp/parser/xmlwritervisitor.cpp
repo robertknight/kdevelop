@@ -33,14 +33,12 @@ const char* XmlWriterVisitor::FALSE_STR = "0";
 
 XmlWriterVisitor::XmlWriterVisitor()
 	: m_streamWriter(0)
-	, m_tokenStream(0)
 {
 }
 
-void XmlWriterVisitor::write(QIODevice* device, AST* node, TokenStream* tokenStream)
+void XmlWriterVisitor::write(QIODevice* device, AST* node)
 {
 	m_streamWriter = new QXmlStreamWriter(device);
-	m_tokenStream = tokenStream;
 	m_streamWriter->setAutoFormatting(true);
 	m_streamWriter->writeStartDocument();
 	visit(node);
@@ -57,40 +55,40 @@ void XmlWriterVisitor::visit(AST* node)
 	if (node)
 	{
 		m_streamWriter->writeStartElement(AST::kindNames[node->kind]);
-			DefaultVisitor::visit(node);
+		MergedVisitor::visit(node);
 		m_streamWriter->writeEndElement();
 	}
 }
 void XmlWriterVisitor::visitBinaryExpression(BinaryExpressionAST* node)
 {
-	m_streamWriter->writeAttribute("operator",tokenString(node->op));
+	m_streamWriter->writeAttribute("operator",tokenString(node,node->op));
 	DefaultVisitor::visitBinaryExpression(node);
 }
 void XmlWriterVisitor::visitBaseSpecifier(BaseSpecifierAST* node)
 {
-	m_streamWriter->writeAttribute("visbility",tokenString(node->access_specifier));
-	m_streamWriter->writeAttribute("virtual",tokenString(node->virt));
+	m_streamWriter->writeAttribute("visbility",tokenString(node,node->access_specifier));
+	m_streamWriter->writeAttribute("virtual",tokenString(node,node->virt));
 	DefaultVisitor::visitBaseSpecifier(node);
 }
 void XmlWriterVisitor::visitClassMemberAccess(ClassMemberAccessAST* node)
 {
-	m_streamWriter->writeAttribute("operator",tokenString(node->op));
+	m_streamWriter->writeAttribute("operator",tokenString(node,node->op));
 	DefaultVisitor::visitClassMemberAccess(node);
 }
 void XmlWriterVisitor::visitClassSpecifier(ClassSpecifierAST* node)
 {
 	visitTypeSpecifier(node);
-	m_streamWriter->writeAttribute("type",tokenString(node->class_key));
+	m_streamWriter->writeAttribute("type",tokenString(node,node->class_key));
 	DefaultVisitor::visitClassSpecifier(node);
 }
 void XmlWriterVisitor::visitCppCastExpression(CppCastExpressionAST* node)
 {
-	m_streamWriter->writeAttribute("operator",tokenString(node->op));
+	m_streamWriter->writeAttribute("operator",tokenString(node,node->op));
 	DefaultVisitor::visitCppCastExpression(node);
 }
 void XmlWriterVisitor::visitDeclarator(DeclaratorAST* node)
 {
-	m_streamWriter->writeAttribute("cvqualifiers",tokenListString(node->fun_cv));
+	m_streamWriter->writeAttribute("cvqualifiers",tokenListString(node,node->fun_cv));
 	DefaultVisitor::visitDeclarator(node);
 }
 void XmlWriterVisitor::visitDeleteExpression(DeleteExpressionAST* node)
@@ -100,7 +98,7 @@ void XmlWriterVisitor::visitDeleteExpression(DeleteExpressionAST* node)
 }
 void XmlWriterVisitor::visitUnqualifiedName(UnqualifiedNameAST* node)
 {
-	m_streamWriter->writeCharacters(tokenString(node->tilde) + tokenString(node->id));
+	m_streamWriter->writeCharacters(tokenString(node,node->tilde) + tokenString(node,node->id));
 	DefaultVisitor::visitUnqualifiedName(node);
 }
 void XmlWriterVisitor::visitEnumSpecifier(EnumSpecifierAST* node)
@@ -111,12 +109,12 @@ void XmlWriterVisitor::visitEnumSpecifier(EnumSpecifierAST* node)
 void XmlWriterVisitor::visitElaboratedTypeSpecifier(ElaboratedTypeSpecifierAST* node)
 {
 	visitTypeSpecifier(node);
-	m_streamWriter->writeAttribute("type",tokenString(node->type));
+	m_streamWriter->writeAttribute("type",tokenString(node,node->type));
 	DefaultVisitor::visitElaboratedTypeSpecifier(node);
 }
 void XmlWriterVisitor::visitEnumerator(EnumeratorAST* node)
 {
-	m_streamWriter->writeAttribute("identifier",tokenString(node->id));
+	m_streamWriter->writeAttribute("identifier",tokenString(node,node->id));
 	DefaultVisitor::visitEnumerator(node);
 }
 void XmlWriterVisitor::visitExceptionDeclaration(ExceptionDeclarationAST* node)
@@ -131,18 +129,18 @@ void XmlWriterVisitor::visitExceptionSpecification(ExceptionSpecificationAST* no
 }
 void XmlWriterVisitor::visitFunctionDefinition(FunctionDefinitionAST* node)
 {
-	m_streamWriter->writeAttribute("storage",tokenListString(node->storage_specifiers));
-	m_streamWriter->writeAttribute("specifiers",tokenListString(node->function_specifiers));
+	m_streamWriter->writeAttribute("storage",tokenListString(node,node->storage_specifiers));
+	m_streamWriter->writeAttribute("specifiers",tokenListString(node,node->function_specifiers));
 	DefaultVisitor::visitFunctionDefinition(node);
 }
 void XmlWriterVisitor::visitUnaryExpression(UnaryExpressionAST* node)
 {
-	m_streamWriter->writeAttribute("operator",tokenString(node->op));
+	m_streamWriter->writeAttribute("operator",tokenString(node,node->op));
 	DefaultVisitor::visitUnaryExpression(node);
 }
 void XmlWriterVisitor::visitLinkageSpecification(LinkageSpecificationAST* node)
 {
-	m_streamWriter->writeAttribute("extern",tokenString(node->extern_type));
+	m_streamWriter->writeAttribute("extern",tokenString(node,node->extern_type));
 	DefaultVisitor::visitLinkageSpecification(node);
 }
 void XmlWriterVisitor::visitName(NameAST* node)
@@ -152,31 +150,31 @@ void XmlWriterVisitor::visitName(NameAST* node)
 }
 void XmlWriterVisitor::visitNamespace(NamespaceAST* node)
 {
-	m_streamWriter->writeAttribute("name",tokenString(node->namespace_name));
+	m_streamWriter->writeAttribute("name",tokenString(node,node->namespace_name));
 	DefaultVisitor::visitNamespace(node);
 }
 void XmlWriterVisitor::visitNamespaceAliasDefinition(NamespaceAliasDefinitionAST* node)
 {
-	m_streamWriter->writeAttribute("name",tokenString(node->namespace_name));
+	m_streamWriter->writeAttribute("name",tokenString(node,node->namespace_name));
 	DefaultVisitor::visitNamespaceAliasDefinition(node);
 }
 void XmlWriterVisitor::visitOperator(OperatorAST* node)
 {
-	m_streamWriter->writeAttribute("operator",tokenString(node->op));
-	m_streamWriter->writeAttribute("open",tokenString(node->open));
-	m_streamWriter->writeAttribute("close",tokenString(node->close));
+	m_streamWriter->writeAttribute("operator",tokenString(node,node->op));
+	m_streamWriter->writeAttribute("open",tokenString(node,node->open));
+	m_streamWriter->writeAttribute("close",tokenString(node,node->close));
 	DefaultVisitor::visitOperator(node);
 }
 void XmlWriterVisitor::visitIncrDecrExpression(IncrDecrExpressionAST* node)
 {
-	m_streamWriter->writeAttribute("operator",tokenString(node->op));
+	m_streamWriter->writeAttribute("operator",tokenString(node,node->op));
 	DefaultVisitor::visitIncrDecrExpression(node);
 }
 void XmlWriterVisitor::visitJumpStatement(JumpStatementAST* node)
 {
-  m_streamWriter->writeAttribute("operator",tokenString(node->op));
-  if (m_tokenStream->kind(node->op) == Token_goto)
-    m_streamWriter->writeAttribute("identifier",tokenString(node->identifier));
+  m_streamWriter->writeAttribute("operator",tokenString(node,node->op));
+  if (tokenLookup()->token(node,node->op)->kind == Token_goto)
+    m_streamWriter->writeAttribute("identifier",tokenString(node,node->identifier));
 
   DefaultVisitor::visitJumpStatement(node);
 }
@@ -187,23 +185,23 @@ void XmlWriterVisitor::visitParameterDeclarationClause(ParameterDeclarationClaus
 }
 void XmlWriterVisitor::visitPrimaryExpression(PrimaryExpressionAST* node)
 {
-	m_streamWriter->writeCharacters(tokenString(node->token));
+	m_streamWriter->writeCharacters(tokenString(node,node->token));
 	DefaultVisitor::visitPrimaryExpression(node);
 }
 void XmlWriterVisitor::visitPtrOperator(PtrOperatorAST* node)
 {
-	m_streamWriter->writeAttribute("cvqualifiers",tokenListString(node->cv));
+	m_streamWriter->writeAttribute("cvqualifiers",tokenListString(node,node->cv));
 	DefaultVisitor::visitPtrOperator(node);
 }
 void XmlWriterVisitor::visitSimpleDeclaration(SimpleDeclarationAST* node)
 {
-	m_streamWriter->writeAttribute("storage",tokenListString(node->storage_specifiers));
-	m_streamWriter->writeAttribute("specifiers",tokenListString(node->function_specifiers));
+	m_streamWriter->writeAttribute("storage",tokenListString(node,node->storage_specifiers));
+	m_streamWriter->writeAttribute("specifiers",tokenListString(node,node->function_specifiers));
 	DefaultVisitor::visitSimpleDeclaration(node);
 }
 void XmlWriterVisitor::visitStringLiteral(StringLiteralAST* node)
 {
-	m_streamWriter->writeCharacters(tokenListString(node->literals));
+	m_streamWriter->writeCharacters(tokenListString(node,node->literals));
 	DefaultVisitor::visitStringLiteral(node);
 }
 void XmlWriterVisitor::visitTemplateDeclaration(TemplateDeclarationAST* node)
@@ -213,34 +211,34 @@ void XmlWriterVisitor::visitTemplateDeclaration(TemplateDeclarationAST* node)
 }
 void XmlWriterVisitor::visitAccessSpecifier(AccessSpecifierAST* node)
 {
-	m_streamWriter->writeCharacters(tokenListString(node->specs));
+	m_streamWriter->writeCharacters(tokenListString(node,node->specs));
 	DefaultVisitor::visitAccessSpecifier(node);
 }
 void XmlWriterVisitor::visitTypeParameter(TypeParameterAST* node)
 {
-	m_streamWriter->writeAttribute("type",tokenString(node->type));
+	m_streamWriter->writeAttribute("type",tokenString(node,node->type));
 	DefaultVisitor::visitTypeParameter(node);
 }
 void XmlWriterVisitor::visitUsing(UsingAST* node)
 {
-	m_streamWriter->writeAttribute("name",tokenString(node->type_name));
+	m_streamWriter->writeAttribute("name",tokenString(node,node->type_name));
 	DefaultVisitor::visitUsing(node);
 }
 void XmlWriterVisitor::visitTypeSpecifier(TypeSpecifierAST* node)
 {
-	m_streamWriter->writeAttribute("cvqualifiers",tokenListString(node->cv));
+	m_streamWriter->writeAttribute("cvqualifiers",tokenListString(node,node->cv));
 }
 void XmlWriterVisitor::visitSimpleTypeSpecifier(SimpleTypeSpecifierAST* node)
 {
 	visitTypeSpecifier(node);
 	
 	// primitive types
-	QString typeName = tokenListString(node->integrals);
+	QString typeName = tokenListString(node,node->integrals);
 	if (node->name)
 	{
 		if (!typeName.isEmpty())
 			typeName.append(' ');
-		typeName.append(tokenString(node->name->unqualified_name->id));
+		typeName.append(tokenString(node,node->name->unqualified_name->id));
 	}
 
 	m_streamWriter->writeCharacters(typeName);
@@ -249,16 +247,15 @@ void XmlWriterVisitor::visitSimpleTypeSpecifier(SimpleTypeSpecifierAST* node)
 }
 void XmlWriterVisitor::visitWinDeclSpec(WinDeclSpecAST* node)
 {
-	m_streamWriter->writeAttribute("specifier",tokenString(node->specifier));
-	m_streamWriter->writeAttribute("modifier",tokenString(node->modifier));
+	m_streamWriter->writeAttribute("specifier",tokenString(node,node->specifier));
+	m_streamWriter->writeAttribute("modifier",tokenString(node,node->modifier));
 	DefaultVisitor::visitWinDeclSpec(node);
 }
-QString XmlWriterVisitor::tokenString(std::size_t token) const
+QString XmlWriterVisitor::tokenString(AST* node,std::size_t token) const
 {
-	Q_ASSERT(m_tokenStream);
-	return m_tokenStream->token(token).symbol();
+    return tokenLookup()->tokenString(node,token);
 }
-QString XmlWriterVisitor::tokenListString(const ListNode<std::size_t>* list) const
+QString XmlWriterVisitor::tokenListString(AST* node,const ListNode<std::size_t>* list) const
 {
 	if (list != 0)
 		list = list->toFront();
@@ -266,7 +263,7 @@ QString XmlWriterVisitor::tokenListString(const ListNode<std::size_t>* list) con
 	QString result;
 	while (list != 0)
 	{
-		result.append(tokenString(list->element));
+		result.append(tokenString(node,list->element));
 		if (list->hasNext())
 		{
 			result.append(' ');
