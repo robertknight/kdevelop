@@ -2,19 +2,23 @@
 #ifndef ASTMERGER_H
 #define ASTMERGER_H
 
+#include "ast.h"
+#include "prettyprintvisitor.h"
+
+class QIODevice;
+
 /** 
  * Prints out transformed source code.
  */
-class TransformedSourcePrinter 
+class KDEVCPPPARSER_EXPORT TransformedSourcePrinter : public PrettyPrintVisitor 
 {
 public:
     TransformedSourcePrinter();
-	void setNodeLookup(NodeLookup* lookup);
-	void write(QIODevice* device, AST* rootNode);
+
+    virtual void visit(AST* node);
 
 private:
-	NodeLookup* m_lookup;
-    PrettyPrintVisitor m_prettyPrinter;
+    void writeOriginalContent(AST* node);
 };
 
 #endif // ASTMERGER_H
