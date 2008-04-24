@@ -105,7 +105,7 @@ protected:
   virtual void visitWhileStatement(WhileStatementAST *) {}
   virtual void visitWinDeclSpec(WinDeclSpecAST *) {}
   virtual void visitHandler(HandlerAST *) {}
-	virtual void visitExceptionDeclaration(ExceptionDeclarationAST *) {}
+  virtual void visitExceptionDeclaration(ExceptionDeclarationAST *) {}
   virtual void visitFunctionTryBlock(FunctionTryBlockAST *) {}
   virtual void visitJumpStatement(JumpStatementAST *) {}
 
