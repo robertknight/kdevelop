@@ -19,6 +19,7 @@ public:
 
 private:
     void writeOriginalContent(AST* node);
+    void writeChildrenChangedNode(AST* node);
 };
 
 #endif // ASTMERGER_H

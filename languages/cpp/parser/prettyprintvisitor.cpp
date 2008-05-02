@@ -65,6 +65,21 @@ void SimplePrinter::enter(AST* node)
 			break;
 	};
 }
+void SimplePrinter::printRaw(const QByteArray& data)
+{
+    if (data.isEmpty())
+        return;
+
+    flush();
+    if (mustSpace(data[0]))
+        *m_output << ' ';
+
+    *m_output << data;
+
+    QChar lastCh = QChar(data[data.count()-1]);
+    m_lastWasAlphaNum = lastCh.isLetterOrNumber();
+    m_lastTokenType = lastCh.toAscii();
+}
 void SimplePrinter::leave(AST* node)
 {
 	switch (node->kind)
@@ -111,11 +126,9 @@ void SimplePrinter::print(int tokenType, const QString& text)
 	{
 		m_lineOutput << ' ';
 	}
-
-	bool 	requiresSpace = alphaNum && m_lastWasAlphaNum;
-			requiresSpace = requiresSpace || (m_lastTokenType == '>' && tokenType == '>');
-			requiresSpace = requiresSpace || (m_lastTokenType == '>' && tokenType == '=');
-
+    
+    Q_ASSERT(!text.isEmpty());
+    bool requiresSpace = mustSpace(text[0]);	
 
 	// whitespace based on current token 
 	if (requiresSpace)
@@ -135,13 +148,25 @@ void SimplePrinter::print(int tokenType, const QString& text)
 	m_lastWasAlphaNum = alphaNum;
 	m_lastTokenType = tokenType;
 }
+bool SimplePrinter::mustSpace(QChar ch)
+{
+    bool 	requiresSpace = ch.isLetterOrNumber() && m_lastWasAlphaNum;
+			requiresSpace = requiresSpace || (m_lastTokenType == '>' && ch == '>');
+			requiresSpace = requiresSpace || (m_lastTokenType == '>' && ch == '=');
+
+    return requiresSpace;
+}
+void SimplePrinter::flush()
+{
+    *m_output << m_currentLine;
+	m_currentLine.clear();
+}
 void SimplePrinter::newLine()
 {
-	if (m_indentation > 0)
+    if (m_indentation > 0)
 		*m_output << QString(m_indentation,'\t');
-	*m_output << m_currentLine;
-	m_currentLine.clear();
-	*m_output << '\n';
+    flush();
+    *m_output << '\n';
 }
 
 PrettyPrintVisitor::PrettyPrintVisitor()

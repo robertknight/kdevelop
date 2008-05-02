@@ -27,7 +27,7 @@ const Token* TokenStreamTokenLookup::token(AST*, std::size_t index) const
 bool TokenStreamTokenLookup::hasOriginalContent(AST*) const
 { return true; }
 QByteArray TokenStreamTokenLookup::originalContent(AST* node) const
-{ 
+{
     const Token* startToken = token(node,node->start_token);
     const Token* endToken = token(node,node->end_token);
 
@@ -37,10 +37,14 @@ QByteArray TokenStreamTokenLookup::originalContent(AST* node) const
    
     const char* contents = startToken->session->contents();
   
-    Q_ASSERT(endToken->position + endToken->size <= startToken->session->size());
+    Q_ASSERT(endToken->position <= startToken->session->size());
 
-    return QByteArray(contents + startToken->position,
-                      (endToken->position+endToken->size) - startToken->position);
+    QByteArray result = QByteArray(contents + startToken->position,
+                      endToken->position - startToken->position);
+
+    qDebug() << "Original content for node" << AST::kindNames[node->kind] << result;
+
+    return result;
 }
 MergedTokenLookup::MergedTokenLookup(TokenStream* sourceStream)
 : TokenStreamTokenLookup(sourceStream)

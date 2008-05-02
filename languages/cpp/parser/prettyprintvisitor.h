@@ -34,6 +34,7 @@ public:
 	virtual void enter(AST* node) = 0;
 	virtual void leave(AST* node) = 0;
 	virtual void print(int tokenType, const QString& text) = 0;
+    virtual void printRaw(const QByteArray& data) = 0;
 
 	PrettyPrintWriter& operator<< (int tokenType);
 	PrettyPrintWriter& operator<< (const QString& text);
@@ -45,9 +46,12 @@ public:
 	virtual void enter(AST* node);
 	virtual void leave(AST* node);
 	virtual void print(int tokenType, const QString& text);
+    virtual void printRaw(const QByteArray& data);
 
 private:
 	void newLine();
+    void flush();
+    bool mustSpace(QChar ch);
 
 	QString m_currentLine;
 	QTextStream m_lineOutput;
