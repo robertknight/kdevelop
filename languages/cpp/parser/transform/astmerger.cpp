@@ -45,6 +45,8 @@ void TransformedSourcePrinter::visit(AST* rootNode)
 }
 void TransformedSourcePrinter::writeChildrenChangedNode(AST* node)
 {
+    QBuffer tempBuffer;
+
     PrettyPrintVisitor::visit(node);
 }
 void TransformedSourcePrinter::writeOriginalContent(AST* node)
